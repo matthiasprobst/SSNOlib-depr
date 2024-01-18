@@ -13,6 +13,7 @@ from pydantic import EmailStr
 
 from . import plugins
 from .context import SSNO as SSNO_CONTEXT_URL
+from .namespace import SSNO
 from .utils import download_file
 
 standard_name_table: str
@@ -21,7 +22,7 @@ standard_name_table: str
 class _Core(abc.ABC):
 
     @abc.abstractmethod
-    def _repr_html_(self):
+    def _repr_html_(self) -> str:
         """Returns the HTML representation of the class"""
 
 
@@ -64,7 +65,8 @@ class Distribution(Resource):
                              overwrite_existing=overwrite_existing)
 
 
-class Contact(BaseModel):
+class Contact(BaseModel, _Core):
+    """foaf:Person"""
     first_name: str = None  # foaf:firstName
     last_name: str = None  # foaf:lastName
     mbox: EmailStr = None  # foaf:mbox
@@ -74,6 +76,10 @@ class Contact(BaseModel):
     @classmethod
     def _identifier(cls, identifier):
         return str(identifier)
+
+    def _repr_html_(self) -> str:
+        """Returns the HTML representation of the class"""
+        return f"{self.__class__.__name__}({self.first_name} {self.last_name}, {self.mbox}, {self.identifier})"
 
 
 class Dataset(Resource):
@@ -134,7 +140,7 @@ class StandardName(BaseModel, _Core):
         """alias for model_dump_json()"""
         return self.model_dump_json(*args, **kwargs)
 
-    def dump_jsonld(self, id=None, *args, **kwargs):
+    def dump_jsonld(self, id=None, context=SSNO_CONTEXT_URL) -> str:
         """alias for model_dump_json()"""
 
         g = rdflib.Graph()
@@ -154,9 +160,11 @@ class StandardName(BaseModel, _Core):
                   ]}
 
         g.parse(data=json.dumps(jsonld), format='json-ld')
-        return g.serialize(format='json-ld',
-                           context={"@import": SSNO_CONTEXT_URL},
-                           indent=4)
+        if context:
+            return g.serialize(format='json-ld',
+                               context={"@import": SSNO_CONTEXT_URL},
+                               indent=4)
+        return g.serialize(format='json-ld', indent=4)
 
     @pydantic.field_validator('dbpedia_match')
     @classmethod
@@ -172,7 +180,7 @@ class StandardName(BaseModel, _Core):
         return self.standard_name
 
 
-class StandardNameTable(Dataset):
+class StandardNameTable(Dataset, _Core):
     """Implementation of ssno:StandardNameTable
 
     Parameters
@@ -210,7 +218,8 @@ class StandardNameTable(Dataset):
 
     @classmethod
     def parse(cls, filename, format='xml'):
-        """Call the reader plugin for the given format"""
+        """Call the reader plugin for the given format.
+        Format will select the reader plugin to use. Currently 'xml' is supported."""
         Reader = plugins.get(format)
         xml_data: Dict = Reader(filename).parse()
 
@@ -218,8 +227,46 @@ class StandardNameTable(Dataset):
         for sn in sndata:
             if sn['description'] is None:
                 name = sn['standard_name']
-                warnings.warn(f'Description of "{name}" is None. Setting to empty string.')
+                warnings.warn(f'Description of "{name}" is None. Setting to empty string.', UserWarning)
                 sn['description'] = ""
         return cls(title=str(filename),
                    standard_names=[StandardName(**sn) for sn in sndata],
                    **xml_data)
+
+    def dump_jsonld(self, context=SSNO_CONTEXT_URL) -> str:
+        """Returns the JSON-LD representation of the class"""
+        _id = '_:' or id
+        jsonld = {"@context": {"@import": SSNO_CONTEXT_URL},
+                  "@graph": [
+                      {"@id": _id,
+                       "@type": SSNO.StandardNameTable,
+                       "title": self.title}
+                  ]}
+        if self.description:
+            jsonld['@graph'][0]['description'] = self.description
+        if self.contact:
+            contact = {'@id': '_:contact',
+                       '@type': 'Person',
+                       **self.contact.model_dump(exclude_none=True)}
+            # if 'first_name'
+            jsonld['@graph'][0]['contact'] = contact
+        if self.modified:
+            jsonld['@graph'][0]['modified'] = self.modified
+        if self.version:
+            jsonld['@graph'][0]['version'] = self.version
+        if self.identifier:
+            jsonld['@graph'][0]['identifier'] = self.identifier
+        if self.standard_names:
+            sn_type = SSNO.StandardName
+            jsonld['@graph'][0]['standard names'] = []
+            for sn in self.standard_names[0:2]:
+                jsonld['@graph'][0]['standard names'].append({'@id': f'_:{sn.standard_name}',
+                                                              '@type': sn_type,
+                                                              **sn.model_dump(exclude_none=True)})
+        g = rdflib.Graph()
+        g.parse(data=json.dumps(jsonld), format='json-ld')
+        if context:
+            return g.serialize(format='json-ld',
+                               context={"@import": SSNO_CONTEXT_URL},
+                               indent=4)
+        return g.serialize(format='json-ld', indent=4)

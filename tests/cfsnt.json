@@ -1,0 +1,43 @@
+{
+    "@context": {
+        "@import": "https://raw.githubusercontent.com/matthiasprobst/ssno/main/ssno_context.jsonld"
+    },
+    "@graph": [
+        {
+            "@id": "_:",
+            "@type": "StandardNameTable",
+            "has_standard_names": [
+                {
+                    "@id": "_:acoustic_area_backscattering_strength_in_sea_water"
+                },
+                {
+                    "@id": "_:acoustic_signal_roundtrip_travel_time_in_sea_water"
+                }
+            ],
+            "https://matthiasprobst.github.io/ssno#contact": {
+                "@id": "_:contact"
+            },
+            "title": "CF Standard Name Table 83",
+            "version": "83"
+        },
+        {
+            "@id": "_:contact",
+            "@type": "Person",
+            "mbox": "support@ceda.ac.uk"
+        },
+        {
+            "@id": "_:acoustic_area_backscattering_strength_in_sea_water",
+            "@type": "StandardName",
+            "canonical_units": "",
+            "description": "Acoustic area backscattering strength is 10 times the log10 of the ratio of the area backscattering coefficient to the reference value, 1 (m2 m-2). Area backscattering coefficient is the integral of the volume backscattering coefficient over a defined distance. Volume backscattering coefficient is the linear form of acoustic_volume_backscattering_strength_in_sea_water. For further details see MacLennan et. al (2002) doi:10.1006/jmsc.2001.1158.",
+            "standard_name": "acoustic_area_backscattering_strength_in_sea_water"
+        },
+        {
+            "@id": "_:acoustic_signal_roundtrip_travel_time_in_sea_water",
+            "@type": "StandardName",
+            "canonical_units": "",
+            "description": "The quantity with standard name acoustic_signal_roundtrip_travel_time_in_sea_water is the time taken for an acoustic signal to propagate from the emitting instrument to a reflecting surface and back again to the instrument. In the case of an instrument based on the sea floor and measuring the roundtrip time to the sea surface, the data are commonly used as a measure of ocean heat content.",
+            "standard_name": "acoustic_signal_roundtrip_travel_time_in_sea_water"
+        }
+    ]
+}

@@ -1,0 +1,11 @@
+{
+    "@context": {
+        "@import": "https://raw.githubusercontent.com/matthiasprobst/ssno/main/ssno_context.jsonld"
+    },
+    "@id": "_:",
+    "@type": "StandardName",
+    "canonical units": "https://qudt.org/vocab/unit/K",
+    "dbpedia match": "http://dbpedia.org/resource/Air_temperature",
+    "description": "Air temperature is the bulk temperature of the air, not the surface (skin) temperature.",
+    "standard name": "air_temperature"
+}

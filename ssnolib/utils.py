@@ -1,6 +1,11 @@
 import pathlib
 
+import appdirs
 import requests
+
+
+def get_cache_dir() -> pathlib.Path:
+    return pathlib.Path(appdirs.user_cache_dir('ssnolib'))
 
 
 def download_file(url,
@@ -38,6 +43,9 @@ def download_file(url,
 
         # Save the content to a file
         dest_filename = pathlib.Path(dest_filename)
+        dest_parent = dest_filename.parent
+        if not dest_parent.exists():
+            dest_parent.mkdir(parents=True)
         if dest_filename.exists() and overwrite_existing:
             dest_filename.unlink()
         elif dest_filename.exists() and not overwrite_existing:

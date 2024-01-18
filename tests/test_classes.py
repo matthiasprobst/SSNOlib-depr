@@ -1,8 +1,10 @@
 import json
 import pathlib
 import unittest
+import warnings
 
 import pydantic
+import rdflib
 
 from ssnolib import StandardName, StandardNameTable, Contact, Distribution
 from ssnolib.context import SSNO as SSNO_CONTEXT_URL
@@ -13,11 +15,14 @@ __this_dir__ = pathlib.Path(__file__).parent
 def _delete_test_data():
     _filename_to_delete = __this_dir__ / 'cf-standard-name-table.xml'
     _filename_to_delete.unlink(missing_ok=True)
+    # _filename_to_delete = __this_dir__ / 'cfsnt.json'
+    # _filename_to_delete = __this_dir__ / 'cf_table.json'
 
 
 class TestClasses(unittest.TestCase):
 
     def setUp(self) -> None:
+        warnings.filterwarnings("ignore", category=UserWarning)
         _delete_test_data()
 
     def tearDown(self) -> None:
@@ -93,6 +98,14 @@ class TestClasses(unittest.TestCase):
             # invalid string for title:
             StandardNameTable(title=123)
 
+        snt_from_xml.title = f'CF Standard Name Table {snt_from_xml.version}'
+        with open('cfsnt.json', 'w', encoding='utf-8') as f:
+            f.write(snt_from_xml.dump_jsonld())
+
+        g = rdflib.Graph().parse('cfsnt.json', format='json-ld')
+        for s, p, o in g.triples((None, None, None)):
+            self.assertIsInstance(p, rdflib.URIRef)
+
     def test_standard_name(self):
         """describe "air_temperature" from
         http://cfconventions.org/Data/cf-standard-names/current/build/cf-standard-name-table.html"""
@@ -140,6 +153,17 @@ class TestClasses(unittest.TestCase):
 
         # to json-ld:
         atemp_jsonld = atemp.dump_jsonld()
+
+        with open(__this_dir__ / 'cf_table.json', 'w') as f:
+            f.write(atemp_jsonld)
+
+        g = rdflib.Graph()
+        g.parse(data=atemp_jsonld, format='json-ld')
+        self.assertEqual(len(g), 5)
+        for s, p, o in g:
+            self.assertIsInstance(s, rdflib.URIRef)
+            self.assertIsInstance(p, rdflib.URIRef)
+            self.assertIsInstance(o, str)
 
         # serialize with rdflib:
         jsonld_dict = json.loads(atemp_jsonld)
