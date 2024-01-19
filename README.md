@@ -8,11 +8,17 @@ A Python library to work with the [sSNO ontology](https://matthiasprobst.github.
 pip install git+https://github.com/matthiasprobst/SSNOlib.git
 ```
 
-To be able to read standard name table sin XML format (e.g. the cfconvetions.org standard name table), you need to add
+To be able to read standard name tables in XML format (e.g. the cfconvetions.org standard name table), you need to add
 the `xml` extra:
 
 ```bash
 pip install git+https://github.com/matthiasprobst/SSNOlib.git[xml]
+``` 
+
+
+To be able to read standard name table from YAML files, you need to add the `yaml` extra:
+```bash
+pip install git+https://github.com/matthiasprobst/SSNOlib.git[yaml]
 ``` 
 
 ## Documentation
