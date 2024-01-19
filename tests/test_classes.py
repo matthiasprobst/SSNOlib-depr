@@ -13,10 +13,11 @@ __this_dir__ = pathlib.Path(__file__).parent
 
 
 def _delete_test_data():
-    _filename_to_delete = __this_dir__ / 'cf-standard-name-table.xml'
-    _filename_to_delete.unlink(missing_ok=True)
-    _filename_to_delete = __this_dir__ / 'cfsnt.json'
-    _filename_to_delete = __this_dir__ / 'cf_table.json'
+    for _filename_to_delete in (__this_dir__ / 'cf-standard-name-table.xml',
+                                __this_dir__ / 'cfsnt.json',
+                                __this_dir__ / 'cf_table.json',
+                                __this_dir__ / 'cfsnt.json'):
+        _filename_to_delete.unlink(missing_ok=True)
 
 
 class TestClasses(unittest.TestCase):
@@ -106,10 +107,10 @@ class TestClasses(unittest.TestCase):
             ssnolib.StandardNameTable(title=123)
 
         snt_from_xml.title = f'CF Standard Name Table {snt_from_xml.version}'
-        with open('cfsnt.json', 'w', encoding='utf-8') as f:
+        with open(__this_dir__ / 'cfsnt.json', 'w', encoding='utf-8') as f:
             f.write(snt_from_xml.dump_jsonld())
 
-        g = rdflib.Graph().parse('cfsnt.json', format='json-ld')
+        g = rdflib.Graph().parse(__this_dir__ / 'cfsnt.json', format='json-ld')
         for s, p, o in g.triples((None, None, None)):
             self.assertIsInstance(p, rdflib.URIRef)
 
