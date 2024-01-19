@@ -38,18 +38,18 @@ class TestClasses(unittest.TestCase):
 
     def test_ssnolib_Distribution(self):
         distribution = ssnolib.Distribution(title='XML Table',
-                                            downloadURL='http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml',
-                                            mediaType='text/csv')
-        self.assertEqual(str(distribution.mediaType),
+                                            download_URL='http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml',
+                                            media_type='text/csv')
+        self.assertEqual(str(distribution.media_type),
                          "https://www.iana.org/assignments/media-types/text/csv")
 
         distribution = ssnolib.Distribution(title='XML Table',
-                                            downloadURL='http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml',
-                                            mediaType='application/xml')
-        self.assertEqual(str(distribution.mediaType),
+                                            download_URL='http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml',
+                                            media_type='application/xml')
+        self.assertEqual(str(distribution.media_type),
                          "https://www.iana.org/assignments/media-types/application/xml")
         self.assertEqual(distribution.title, 'XML Table')
-        self.assertEqual(str(distribution.downloadURL),
+        self.assertEqual(str(distribution.download_URL),
                          'http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml')
 
         download_filename = distribution.download('cf-standard-name-table.xml')
@@ -65,15 +65,15 @@ class TestClasses(unittest.TestCase):
         self.assertEqual(repr(snt), 'StandardNameTable(title=CF Standard Name Table v79)')
 
         distribution = ssnolib.Distribution(title='XML Table',
-                                            downloadURL='http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml',
-                                            mediaType='application/xml')
+                                            download_URL='http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml',
+                                            media_type='application/xml')
         self.assertEqual(distribution.title, 'XML Table')
-        self.assertEqual(str(distribution.downloadURL),
+        self.assertEqual(str(distribution.download_URL),
                          'http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml')
         snt = ssnolib.StandardNameTable(title='CF Standard Name Table v79',
                                         distribution=[distribution, ])
         self.assertEqual(snt.distribution[0].title, 'XML Table')
-        self.assertEqual(str(snt.distribution[0].downloadURL),
+        self.assertEqual(str(snt.distribution[0].download_URL),
                          'http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml')
         table_filename = snt.distribution[0].download(
             dest_filename=__this_dir__ / 'cf-standard-name-table.xml',
@@ -118,23 +118,22 @@ class TestClasses(unittest.TestCase):
         http://cfconventions.org/Data/cf-standard-names/current/build/cf-standard-name-table.html"""
 
         with self.assertRaises(pydantic.ValidationError):
-            # invalid URL
-            ssnolib.StandardName(standard_name='air_temperature',
-                                 canonical_units='K',
-                                 description='Air temperature is the bulk temperature of the air, not the surface (skin) temperature.',
-                                 dbpedia_match='Air_temperature')
+            # invalid canonical_units
+            ssnolib.StandardName(
+                standard_name='air_temperature',
+                canonical_units=123,
+                description='Air temperature is the bulk temperature of the air, not the surface (skin) temperature.', )
 
-        atemp = ssnolib.StandardName(standard_name='air_temperature',
-                                     canonical_units='K',
-                                     description='Air temperature is the bulk temperature of the air, not the surface (skin) temperature.',
-                                     dbpedia_match='http://dbpedia.org/resource/Air_temperature')
+        atemp = ssnolib.StandardName(
+            standard_name='air_temperature',
+            canonical_units='K',
+            description='Air temperature is the bulk temperature of the air, not the surface (skin) temperature.')
 
         self.assertEqual(str(atemp), 'air_temperature')
         self.assertEqual(atemp.standard_name, 'air_temperature')
         self.assertEqual(atemp.canonical_units, 'K')
         self.assertEqual(atemp.description,
                          'Air temperature is the bulk temperature of the air, not the surface (skin) temperature.')
-        self.assertEqual(atemp.dbpedia_match, 'http://dbpedia.org/resource/Air_temperature')
 
         self.assertEqual(str(atemp), 'air_temperature')
         self.assertEqual(atemp.standard_name_table, None)
@@ -146,7 +145,6 @@ class TestClasses(unittest.TestCase):
         self.assertEqual(atemp_dict['canonical_units'], 'K')
         self.assertEqual(atemp_dict['description'],
                          'Air temperature is the bulk temperature of the air, not the surface (skin) temperature.')
-        self.assertEqual(atemp_dict['dbpedia_match'], 'http://dbpedia.org/resource/Air_temperature')
 
         atemp_json = atemp.model_dump_json()
         self.assertIsInstance(atemp_json, str)
@@ -156,7 +154,6 @@ class TestClasses(unittest.TestCase):
         self.assertEqual(atemp_json_dict['canonical_units'], 'K')
         self.assertEqual(atemp_json_dict['description'],
                          'Air temperature is the bulk temperature of the air, not the surface (skin) temperature.')
-        self.assertEqual(atemp_json_dict['dbpedia_match'], 'http://dbpedia.org/resource/Air_temperature')
 
         # to json-ld:
         atemp_jsonld = atemp.dump_jsonld()
@@ -166,7 +163,7 @@ class TestClasses(unittest.TestCase):
 
         g = rdflib.Graph()
         g.parse(data=atemp_jsonld, format='json-ld')
-        self.assertEqual(len(g), 5)
+        self.assertEqual(len(g), 4)
         for s, p, o in g:
             self.assertIsInstance(s, rdflib.URIRef)
             self.assertIsInstance(p, rdflib.URIRef)
@@ -185,8 +182,8 @@ class TestClasses(unittest.TestCase):
     def test_snt_from_yaml(self):
         snt_yml_filename = __this_dir__ / 'data/test_snt.yaml'
         distribution = ssnolib.Distribution(title='XML Table',
-                                            downloadURL=f'file:///{snt_yml_filename}',
-                                            mediaType='application/yaml')
+                                            download_URL=f'file:///{snt_yml_filename}',
+                                            media_type='application/yaml')
         filename = distribution.download()
 
         self.assertTrue(pathlib.Path(filename).exists())
@@ -196,3 +193,4 @@ class TestClasses(unittest.TestCase):
         )
         snt.parse(snt.distribution[0])
         print(repr(snt))
+        print(snt._repr_html_())

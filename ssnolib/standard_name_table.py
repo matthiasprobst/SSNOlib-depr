@@ -40,7 +40,8 @@ class StandardNameTable(Dataset):
 
     def _repr_html_(self):
         """Returns the HTML representation of the class"""
-        return f"{self.__class__.__name__}(<a href={self.distribution.downloadURL}>{self.title}</a>)"
+        urls = ', '.join(f'<a href="{d.download_URL}">{d.title}</a>' for d in self.distribution)
+        return f"{self.__class__.__name__}({urls})"
 
     @classmethod
     def parse(cls,
@@ -60,7 +61,7 @@ class StandardNameTable(Dataset):
                     )
         else:
             if format is None:
-                format = source.mediaType
+                format = source.media_type
             filename = source.download()
 
         Reader = plugins.get(format)

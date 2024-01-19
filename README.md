@@ -8,6 +8,21 @@ A Python library to work with the [sSNO ontology](https://matthiasprobst.github.
 pip install git+https://github.com/matthiasprobst/SSNOlib.git
 ```
 
+To be able to read standard name table sin XML format (e.g. the cfconvetions.org standard name table), you need to add
+the `xml` extra:
+
+```bash
+pip install git+https://github.com/matthiasprobst/SSNOlib.git[xml]
+``` 
+
+## Documentation
+
+A complete documentation is still under development. However, the docstrings of the classes and methods should be
+sufficient to get started. Also have a look at the [Tutorial Notebook](docs/Tutorial.ipynb) or following class diagram
+and the [usage](#usage) examples below.
+
+![Class diagram](docs/class_structure.png)
+
 ## Usage
 
 Describe a Standard Name Table ith *sSNO*. Let's take the one from cfconventions.org as an example:
@@ -17,12 +32,12 @@ import ssnolib
 
 # Create a distribution object (downloadable XML file containing the standard name table)
 distribution = ssnolib.Distribution(title='XML Table',
-                                    downloadURL='http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml',
-                                    mediaType='application/xml')
+                                    download_URL='http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml',
+                                    media_type='application/xml')
 
 # Create a standard name table object
 snt = ssnolib.StandardNameTable(title='CF Standard Name Table v79',
-                                distributions=[distribution, ])
+                                distribution=[distribution, ])
 
 # To describe this standard name table, we can export the JSON-LD file:
 with open('cf79.jsonld', 'w', encoding='utf-8') as f:
@@ -84,8 +99,7 @@ import ssnolib
 
 air_temp = ssnolib.StandardName(standard_name='air_temperature',
                                 canonical_units='K',
-                                description='Air temperature is the bulk temperature of the air, not the surface (skin) temperature.',
-                                dbpedia_match='http://dbpedia.org/resource/Air_temperature')
+                                description='Air temperature is the bulk temperature of the air, not the surface (skin) temperature.')
 
 # write to JSON-LD
 with open('air_temperature.json', 'w') as f:
@@ -102,10 +116,19 @@ The corresponding JSON-LD file looks like this:
   "@id": "_:",
   "@type": "StandardName",
   "canonical units": "https://qudt.org/vocab/unit/K",
-  "dbpedia match": "http://dbpedia.org/resource/Air_temperature",
   "description": "Air temperature is the bulk temperature of the air, not the surface (skin) temperature.",
   "standard name": "air_temperature"
 }
 ```
 
 You can now take the JSON-LD file and use it with your data (place it next to it, upload it to a server, etc.).
+
+## Contribution
+
+Contributions are welcome. Please open an issue or a pull request.
+
+### Design of model classes
+
+Attributes of the model classes should be the pref label as defined in the ontology. Underscores will be replaced with
+spaces when dumping to JSON-LD files. E.g. `canonical_units` will be `canonical units`  or
+`downloadURL` will be `download URL`  in the JSON-LD file.

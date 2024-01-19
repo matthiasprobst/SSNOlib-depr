@@ -4,7 +4,6 @@ from typing import Union
 
 import pydantic
 import rdflib
-from pydantic import HttpUrl
 
 from .context import SSNO as SSNO_CONTEXT_URL
 from .core import SSNOlibModel
@@ -16,7 +15,6 @@ class StandardName(SSNOlibModel):
     standard_name: str
     canonical_units: Union[str, None]
     description: str  # dcterms:description
-    dbpedia_match: Union[str, HttpUrl] = None  # ssno:dbpediaMatch
     standard_name_table: Dataset = None  # ssno:standard_name_table (subclass of dcat:Dataset)
 
     @pydantic.field_validator('description')
@@ -31,7 +29,7 @@ class StandardName(SSNOlibModel):
     @pydantic.field_validator('canonical_units')
     @classmethod
     def _canonical_units(cls, canonical_units):
-        """Validates the downloadURL field"""
+        """Validates the download_URL field"""
         if canonical_units is None:
             return ""
         return canonical_units
@@ -73,15 +71,6 @@ class StandardName(SSNOlibModel):
                                context={"@import": SSNO_CONTEXT_URL},
                                indent=4)
         return g.serialize(format='json-ld', indent=4)
-
-    @pydantic.field_validator('dbpedia_match')
-    @classmethod
-    def _dbpedia_match(cls, url):
-        """Validates the dbpedia_match"""
-        if url is None:
-            return None
-        else:
-            return str(HttpUrl(url))
 
     def _repr_html_(self):
         """Returns the HTML representation of the class"""

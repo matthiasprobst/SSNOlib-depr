@@ -55,43 +55,43 @@ class Distribution(Resource):
 
     Parameters
     ----------
-    downloadURL: Union[HttpUrl, FileUrl]
-        Download URL of the distribution (dcat:downloadURL)
-    mediaType: HttpUrl = None
-        Media type of the distribution (dcat:mediaType).
+    download_URL: Union[HttpUrl, FileUrl]
+        Download URL of the distribution (dcat:download_URL)
+    media_type: HttpUrl = None
+        Media type of the distribution (dcat:media_type).
         Should be defined by the [IANA Media Types registry](https://www.iana.org/assignments/media-types/media-types.xhtml)
-    byteSize: int = None
-        Size of the distribution in bytes (dcat:byteSize)
+    byte_size: int = None
+        Size of the distribution in bytes (dcat:byte_size)
     """
-    downloadURL: Union[HttpUrl, FileUrl]  # dcat:downloadURL, e.g.
-    mediaType: HttpUrl = None  # dcat:mediaType
-    byteSize: int = None  # dcat:byteSize
+    download_URL: Union[HttpUrl, FileUrl]  # dcat:download_URL, e.g.
+    media_type: HttpUrl = None  # dcat:media_type
+    byte_size: int = None  # dcat:byte_size
 
     def _repr_html_(self):
         """Returns the HTML representation of the class"""
-        return f"{self.__class__.__name__}({self.downloadURL})"
+        return f"{self.__class__.__name__}({self.download_URL})"
 
     def download(self, dest_filename: Union[str, pathlib.Path] = None,
                  overwrite_existing: bool = False) -> pathlib.Path:
         """Downloads the distribution"""
-        if self.downloadURL.scheme == 'file':
-            return pathlib.Path(self.downloadURL.path[1:])
-        return download_file(self.downloadURL,
+        if self.download_URL.scheme == 'file':
+            return pathlib.Path(self.download_URL.path[1:])
+        return download_file(self.download_URL,
                              dest_filename,
                              overwrite_existing=overwrite_existing)
 
-    @field_validator('mediaType', mode='before')
+    @field_validator('media_type', mode='before')
     @classmethod
-    def _mediaType(cls, mediaType):
+    def _mediaType(cls, media_type):
         """should be a valid URI, like: https://www.iana.org/assignments/media-types/text/markdown"""
-        if isinstance(mediaType, str):
-            if mediaType.startswith('http'):
-                return HttpUrl(mediaType)
-            elif mediaType.startswith('iana:'):
-                return HttpUrl("https://www.iana.org/assignments/media-types/" + mediaType.split(":", 1)[-1])
-            elif re.match('[a-z].*/[a-z].*', mediaType):
-                return HttpUrl("https://www.iana.org/assignments/media-types/" + mediaType)
-        return mediaType
+        if isinstance(media_type, str):
+            if media_type.startswith('http'):
+                return HttpUrl(media_type)
+            elif media_type.startswith('iana:'):
+                return HttpUrl("https://www.iana.org/assignments/media-types/" + media_type.split(":", 1)[-1])
+            elif re.match('[a-z].*/[a-z].*', media_type):
+                return HttpUrl("https://www.iana.org/assignments/media-types/" + media_type)
+        return media_type
 
 
 class Dataset(Resource):
