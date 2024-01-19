@@ -1,3 +1,4 @@
 rdflib
 pydantic[email]
 appdirs
+python-dateutil
