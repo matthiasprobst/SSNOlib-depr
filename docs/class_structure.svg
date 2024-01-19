@@ -18,7 +18,7 @@
    xmlns:svg="http://www.w3.org/2000/svg">
   <sodipodi:namedview
      id="namedview1"
-     pagecolor="#505050"
+     pagecolor="#000000"
      bordercolor="#eeeeee"
      borderopacity="1"
      inkscape:showpageshadow="0"
@@ -483,12 +483,12 @@
          x="41.541687"
          y="32.81432">+ _repr_html_()</tspan></text>
     <path
-       style="fill:none;stroke:#000000;stroke-width:0.265;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#ColoredTriangle)"
+       style="fill:none;stroke:#686868;stroke-width:0.265;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#ColoredTriangle)"
        d="m 56.497583,42.915997 0.04401,-6.483699"
        id="path2"
        sodipodi:nodetypes="cc" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:0.265;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#ColoredTriangle-30)"
+       style="fill:none;stroke:#686868;stroke-width:0.265;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#ColoredTriangle-30)"
        d="M 56.762171,15.327586 56.782252,3.8884713"
        id="path2-2"
        sodipodi:nodetypes="cc" />
@@ -565,7 +565,7 @@
          x="98.864998"
          y="87.573578">+ modified</tspan></text>
     <path
-       style="fill:none;stroke:#000000;stroke-width:0.265;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#ColoredTriangle-3-4-9)"
+       style="fill:none;stroke:#686868;stroke-width:0.265;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#ColoredTriangle-3-4-9)"
        d="M 9.4457584,39.078131 V 19.234381 H 38.015927"
        id="path2-1-2-9"
        sodipodi:nodetypes="ccc" />
@@ -615,25 +615,26 @@
          x="159.37714"
          y="72.25032">+ standard_names: List[StandardName]</tspan></text>
     <path
-       style="fill:none;stroke:#000000;stroke-width:0.265;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#ColoredTriangle)"
+       style="fill:none;stroke:#686868;stroke-width:0.265;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#ColoredTriangle)"
        d="M 156.74124,19.618478 H 75.741738"
        id="path3"
        sodipodi:nodetypes="cc" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:0.265;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#ColoredTriangle-8)"
+       style="fill:none;stroke:#686868;stroke-width:0.265;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#ColoredTriangle-8)"
        d="m 156.68438,63.425748 -6.48369,-0.044"
        id="path3-3"
        sodipodi:nodetypes="cc" />
     <g
        id="g4"
-       transform="matrix(-1,0,0,1,256.44548,-87.779028)">
+       transform="matrix(-1,0,0,1,256.44548,-87.779028)"
+       style="fill:none;stroke:#686868;stroke-opacity:1">
       <path
-         style="fill:none;stroke:#000000;stroke-width:0.265;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#ColoredTriangle-3-4-9-4)"
+         style="fill:none;stroke:#686868;stroke-width:0.265;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#ColoredTriangle-3-4-9-4)"
          d="m 160.21639,116.27383 h 10.58334 v 18.52083 h 10.58333"
          id="path2-1-2-9-4"
          sodipodi:nodetypes="cccc" />
       <path
-         style="fill:none;stroke:#000000;stroke-width:0.265;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+         style="fill:none;stroke:#686868;stroke-width:0.265;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
          d="m 160.21639,150.66966 h 10.58334 v -15.875"
          id="path4"
          sodipodi:nodetypes="ccc" />
