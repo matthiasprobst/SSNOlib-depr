@@ -5,6 +5,7 @@
 """
 import pathlib
 import re
+import shutil
 from datetime import datetime
 from typing import Union, List
 
@@ -75,7 +76,10 @@ class Distribution(Resource):
                  overwrite_existing: bool = False) -> pathlib.Path:
         """Downloads the distribution"""
         if self.download_URL.scheme == 'file':
-            return pathlib.Path(self.download_URL.path[1:])
+            if dest_filename is None:
+                return pathlib.Path(self.download_URL.path[1:])
+            else:
+                return shutil.copy(pathlib.Path(self.download_URL.path[1:]), dest_filename)
         return download_file(self.download_URL,
                              dest_filename,
                              overwrite_existing=overwrite_existing)

@@ -10,13 +10,16 @@ import ssnolib
 from ssnolib.context import SSNO as SSNO_CONTEXT_URL
 
 __this_dir__ = pathlib.Path(__file__).parent
+CACHE_DIR = ssnolib.utils.get_cache_dir()
 
 
 def _delete_test_data():
-    for _filename_to_delete in (__this_dir__ / 'cf-standard-name-table.xml',
-                                __this_dir__ / 'cfsnt.json',
-                                __this_dir__ / 'cf_table.json',
-                                __this_dir__ / 'cfsnt.json'):
+    for _filename_to_delete in (CACHE_DIR / 'cf-standard-name-table.xml',
+                                CACHE_DIR / 'cfsnt.json',
+                                CACHE_DIR / 'cf_table.json',
+                                CACHE_DIR / 'cfsnt.json',
+                                CACHE_DIR / 'test_snt.yaml',
+                                CACHE_DIR / 'cf-standard-name-table.xml',):
         _filename_to_delete.unlink(missing_ok=True)
 
 
@@ -77,20 +80,20 @@ class TestClasses(unittest.TestCase):
         self.assertEqual(str(snt.distribution[0].download_URL),
                          'http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml')
         table_filename = snt.distribution[0].download(
-            dest_filename=__this_dir__ / 'cf-standard-name-table.xml',
+            dest_filename=CACHE_DIR / 'cf-standard-name-table.xml',
         )
         self.assertIsInstance(table_filename, pathlib.Path)
         self.assertTrue(table_filename.exists())
         self.assertTrue(table_filename.is_file())
-        self.assertEqual(table_filename, __this_dir__ / 'cf-standard-name-table.xml')
+        self.assertEqual(table_filename, CACHE_DIR / 'cf-standard-name-table.xml')
         try:
             snt.distribution[0].download(
-                dest_filename=__this_dir__ / 'cf-standard-name-table.xml',
+                dest_filename=CACHE_DIR / 'cf-standard-name-table.xml',
             )
         except FileExistsError:
             pass
         snt.distribution[0].download(
-            dest_filename=__this_dir__ / 'cf-standard-name-table.xml',
+            dest_filename=CACHE_DIR / 'cf-standard-name-table.xml',
             overwrite_existing=True
         )
         snt_from_xml = snt.parse(table_filename, format='xml')
@@ -107,10 +110,10 @@ class TestClasses(unittest.TestCase):
             ssnolib.StandardNameTable(title=123)
 
         snt_from_xml.title = f'CF Standard Name Table {snt_from_xml.version}'
-        with open(__this_dir__ / 'cfsnt.json', 'w', encoding='utf-8') as f:
+        with open(CACHE_DIR / 'cfsnt.json', 'w', encoding='utf-8') as f:
             f.write(snt_from_xml.dump_jsonld())
 
-        g = rdflib.Graph().parse(__this_dir__ / 'cfsnt.json', format='json-ld')
+        g = rdflib.Graph().parse(CACHE_DIR / 'cfsnt.json', format='json-ld')
         for s, p, o in g.triples((None, None, None)):
             self.assertIsInstance(p, rdflib.URIRef)
 
@@ -159,7 +162,7 @@ class TestClasses(unittest.TestCase):
         # to json-ld:
         atemp_jsonld = atemp.dump_jsonld()
 
-        with open(__this_dir__ / 'cf_table.json', 'w') as f:
+        with open(CACHE_DIR / 'cf_table.json', 'w') as f:
             f.write(atemp_jsonld)
 
         g = rdflib.Graph()
@@ -185,13 +188,12 @@ class TestClasses(unittest.TestCase):
         distribution = ssnolib.Distribution(title='XML Table',
                                             download_URL=f'file:///{snt_yml_filename}',
                                             media_type='application/yaml')
-        filename = distribution.download()
-
+        filename = distribution.download(CACHE_DIR / 'test_snt.yaml')
+        self.assertNotEqual(filename, snt_yml_filename)
         self.assertTrue(pathlib.Path(filename).exists())
+        self.assertIsInstance(filename, pathlib.Path)
         snt = ssnolib.StandardNameTable(
             title='Yaml Test SNT',
             distribution=[distribution]
         )
         snt.parse(snt.distribution[0])
-        print(repr(snt))
-        print(snt._repr_html_())
