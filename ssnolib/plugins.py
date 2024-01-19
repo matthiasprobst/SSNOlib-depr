@@ -1,12 +1,17 @@
 import abc
 import pathlib
+import warnings
 from typing import Dict, Union
+
+import yaml
 
 
 class TableReader(abc.ABC):
 
-    def __init__(self, filename: str):
-        self.filename = filename
+    def __init__(self, filename: Union[str, pathlib.Path]):
+        self.filename = pathlib.Path(filename)
+        assert self.filename.exists(), f'{self.filename} does not exist'
+        assert self.filename.is_file(), f'{self.filename} is not a file'
 
     @abc.abstractmethod
     def parse(self) -> Dict:
@@ -14,11 +19,6 @@ class TableReader(abc.ABC):
 
 
 class XMLReader(TableReader):
-
-    def __init__(self, filename: Union[str, pathlib.Path]):
-        self.filename = pathlib.Path(filename)
-        assert self.filename.exists(), f'{self.filename} does not exist'
-        assert self.filename.is_file(), f'{self.filename} is not a file'
 
     def parse(self) -> Dict:
         """Parse the file"""
@@ -57,38 +57,61 @@ class XMLReader(TableReader):
         sn_data = xmldata.get('entry', None)
         if sn_data is None:
             raise KeyError('Expected key "entry" in the XML file.')
-        return {'standard_name': [_parse_standard_name(sn) for sn in sn_data],
+        data = {'standard_name': [_parse_standard_name(sn) for sn in sn_data],
                 'version': version,
-                'last_modified': last_modified,
+                'modified': last_modified,
                 'contact': contact}
 
-        # for k in data.keys():
-        #     if k not in ('entry', 'alias') and k[0] != '@':
-        #         meta[k] = data[k]
-        #
-        # table = {}
-        # for entry in data['entry']:
-        #     table[entry.pop('@id')] = entry
-        #
-        # _alias = data.get('alias', {})
-        #
-        # if _alias:
-        #     for aliasentry in _alias:
-        #         k, v = list(aliasentry.values())
-        #         table[v]['alias'] = k
-        #
-        # if 'version' not in meta:
-        #     meta['version'] = f"v{meta.get('version_number', None)}"
+        if 'title' not in xmldata:
+            data['title'] = self.filename.stem
+
+        sndata = data.pop('standard_name')
+        for sn in sndata:
+            if sn['description'] is None:
+                name = sn['standard_name']
+                warnings.warn(f'Description of "{name}" is None. Setting to empty string.', UserWarning)
+                sn['description'] = ""
+        data['standard_names'] = sndata
+        return data
+
+
+class YAMLReader(TableReader):
+
+    def parse(self):
+        with open(self.filename, 'r') as f:
+            data = yaml.safe_load(f)
+        standard_names = data['standard_names']
+
+        def _parse_standard_names(name, sndata: Dict):
+            for ustr in ('unit', 'units', 'canonical_unit'):
+                if ustr in sndata:
+                    sndata['canonical_units'] = sndata.pop(ustr)
+                    break
+            _data = {'standard_name': name,
+                     **sndata
+                     }
+            for k in list(_data.keys()):
+                if k not in ('canonical_units', 'description', 'standard_name'):
+                    _data.pop(k)
+            return _data
+
+        return {'title': data.get('name', data.get('title', None)),
+                'standard_names': [_parse_standard_names(k, v) for k, v in data['standard_names'].items()]}
 
 
 _plugins = {
-    'xml': XMLReader
+    'xml': XMLReader,
+    'text/xml': XMLReader,
+    'https://www.iana.org/assignments/media-types/text/xml': XMLReader,
+    'text/yml': YAMLReader,
+    'application/yaml': YAMLReader,
+    'https://www.iana.org/assignments/media-types/application/yaml': YAMLReader
 }
 
 
 def get(plugin_name: str) -> TableReader:
     """Returns the plugin"""
-    plugin = _plugins.get(plugin_name, None)
+    plugin = _plugins.get(str(plugin_name), None)
     if plugin is None:
         raise KeyError(f'No plugin found for {plugin_name}')
     return plugin

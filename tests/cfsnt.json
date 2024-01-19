@@ -17,8 +17,9 @@
             "https://matthiasprobst.github.io/ssno#contact": {
                 "@id": "_:contact"
             },
-            "title": "CF Standard Name Table 83",
-            "version": "83"
+            "modified": "2024-01-19 15:55:10+00:00",
+            "title": "CF Standard Name Table 84",
+            "version": "84"
         },
         {
             "@id": "_:contact",

@@ -6,7 +6,7 @@ import warnings
 import pydantic
 import rdflib
 
-from ssnolib import StandardName, StandardNameTable, Contact, Distribution
+import ssnolib
 from ssnolib.context import SSNO as SSNO_CONTEXT_URL
 
 __this_dir__ = pathlib.Path(__file__).parent
@@ -15,8 +15,8 @@ __this_dir__ = pathlib.Path(__file__).parent
 def _delete_test_data():
     _filename_to_delete = __this_dir__ / 'cf-standard-name-table.xml'
     _filename_to_delete.unlink(missing_ok=True)
-    # _filename_to_delete = __this_dir__ / 'cfsnt.json'
-    # _filename_to_delete = __this_dir__ / 'cf_table.json'
+    _filename_to_delete = __this_dir__ / 'cfsnt.json'
+    _filename_to_delete = __this_dir__ / 'cf_table.json'
 
 
 class TestClasses(unittest.TestCase):
@@ -28,22 +28,29 @@ class TestClasses(unittest.TestCase):
     def tearDown(self) -> None:
         _delete_test_data()
 
-    def test_Contact(self):
-        contact = Contact(mbox='johndoe@email.com')
+    def test_Person(self):
+        contact = ssnolib.Person(mbox='johndoe@email.com')
         self.assertEqual(str(contact.mbox), 'johndoe@email.com')
 
-        contact = Contact(first_name='John', last_name='Doe')
+        contact = ssnolib.Person(first_name='John', last_name='Doe')
         self.assertEqual(contact.first_name, 'John')
         self.assertEqual(contact.last_name, 'Doe')
 
-    def test_Distribution(self):
-        distribution = Distribution(title='XML Table',
-                                    downloadURL='http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml',
-                                    mediaType='application/xml')
+    def test_ssnolib_Distribution(self):
+        distribution = ssnolib.Distribution(title='XML Table',
+                                            downloadURL='http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml',
+                                            mediaType='text/csv')
+        self.assertEqual(str(distribution.mediaType),
+                         "https://www.iana.org/assignments/media-types/text/csv")
+
+        distribution = ssnolib.Distribution(title='XML Table',
+                                            downloadURL='http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml',
+                                            mediaType='application/xml')
+        self.assertEqual(str(distribution.mediaType),
+                         "https://www.iana.org/assignments/media-types/application/xml")
         self.assertEqual(distribution.title, 'XML Table')
-        self.assertEqual(distribution.downloadURL,
+        self.assertEqual(str(distribution.downloadURL),
                          'http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml')
-        self.assertEqual(distribution.mediaType, 'application/xml')
 
         download_filename = distribution.download('cf-standard-name-table.xml')
         self.assertIsInstance(download_filename, pathlib.Path)
@@ -52,21 +59,21 @@ class TestClasses(unittest.TestCase):
         download_filename.unlink(missing_ok=True)
 
     def test_standard_name_table(self):
-        snt = StandardNameTable(title='CF Standard Name Table v79')
+        snt = ssnolib.StandardNameTable(title='CF Standard Name Table v79')
         self.assertEqual(snt.title, 'CF Standard Name Table v79')
         self.assertEqual(str(snt), 'CF Standard Name Table v79')
-        self.assertEqual(repr(snt), 'StandardNameTable(CF Standard Name Table v79)')
+        self.assertEqual(repr(snt), 'StandardNameTable(title=CF Standard Name Table v79)')
 
-        distribution = Distribution(title='XML Table',
-                                    downloadURL='http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml',
-                                    mediaType='application/xml')
+        distribution = ssnolib.Distribution(title='XML Table',
+                                            downloadURL='http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml',
+                                            mediaType='application/xml')
         self.assertEqual(distribution.title, 'XML Table')
-        self.assertEqual(distribution.downloadURL,
+        self.assertEqual(str(distribution.downloadURL),
                          'http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml')
-        snt = StandardNameTable(title='CF Standard Name Table v79',
-                                distribution=[distribution, ])
+        snt = ssnolib.StandardNameTable(title='CF Standard Name Table v79',
+                                        distribution=[distribution, ])
         self.assertEqual(snt.distribution[0].title, 'XML Table')
-        self.assertEqual(snt.distribution[0].downloadURL,
+        self.assertEqual(str(snt.distribution[0].downloadURL),
                          'http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml')
         table_filename = snt.distribution[0].download(
             dest_filename=__this_dir__ / 'cf-standard-name-table.xml',
@@ -88,7 +95,7 @@ class TestClasses(unittest.TestCase):
         snt_from_xml = snt.parse(table_filename, format='xml')
         self.assertIsInstance(snt_from_xml.standard_names, list)
         for sn in snt_from_xml.standard_names:
-            self.assertIsInstance(sn, StandardName)
+            self.assertIsInstance(sn, ssnolib.StandardName)
 
         snt_from_xml_dict = snt_from_xml.model_dump(exclude_none=True)
         self.assertDictEqual(snt_from_xml_dict['contact'],
@@ -96,7 +103,7 @@ class TestClasses(unittest.TestCase):
 
         with self.assertRaises(pydantic.ValidationError):
             # invalid string for title:
-            StandardNameTable(title=123)
+            ssnolib.StandardNameTable(title=123)
 
         snt_from_xml.title = f'CF Standard Name Table {snt_from_xml.version}'
         with open('cfsnt.json', 'w', encoding='utf-8') as f:
@@ -112,15 +119,15 @@ class TestClasses(unittest.TestCase):
 
         with self.assertRaises(pydantic.ValidationError):
             # invalid URL
-            StandardName(standard_name='air_temperature',
-                         canonical_units='K',
-                         description='Air temperature is the bulk temperature of the air, not the surface (skin) temperature.',
-                         dbpedia_match='Air_temperature')
+            ssnolib.StandardName(standard_name='air_temperature',
+                                 canonical_units='K',
+                                 description='Air temperature is the bulk temperature of the air, not the surface (skin) temperature.',
+                                 dbpedia_match='Air_temperature')
 
-        atemp = StandardName(standard_name='air_temperature',
-                             canonical_units='K',
-                             description='Air temperature is the bulk temperature of the air, not the surface (skin) temperature.',
-                             dbpedia_match='http://dbpedia.org/resource/Air_temperature')
+        atemp = ssnolib.StandardName(standard_name='air_temperature',
+                                     canonical_units='K',
+                                     description='Air temperature is the bulk temperature of the air, not the surface (skin) temperature.',
+                                     dbpedia_match='http://dbpedia.org/resource/Air_temperature')
 
         self.assertEqual(str(atemp), 'air_temperature')
         self.assertEqual(atemp.standard_name, 'air_temperature')
@@ -174,3 +181,18 @@ class TestClasses(unittest.TestCase):
         self.assertEqual(jsonld_dict['canonical units'], 'https://qudt.org/vocab/unit/K')
 
         # https://qudt.org/vocab/unit/K
+
+    def test_snt_from_yaml(self):
+        snt_yml_filename = __this_dir__ / 'data/test_snt.yaml'
+        distribution = ssnolib.Distribution(title='XML Table',
+                                            downloadURL=f'file:///{snt_yml_filename}',
+                                            mediaType='application/yaml')
+        filename = distribution.download()
+
+        self.assertTrue(pathlib.Path(filename).exists())
+        snt = ssnolib.StandardNameTable(
+            title='Yaml Test SNT',
+            distribution=[distribution]
+        )
+        snt.parse(snt.distribution[0])
+        print(repr(snt))
