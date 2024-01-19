@@ -5,7 +5,11 @@ import requests
 
 
 def get_cache_dir() -> pathlib.Path:
-    return pathlib.Path(appdirs.user_cache_dir('ssnolib'))
+    """Get the cache directory and create it if it does not exist"""
+    cache_dir = pathlib.Path(appdirs.user_cache_dir('ssnolib'))
+    if not cache_dir.exists():
+        cache_dir.mkdir(parents=True)
+    return cache_dir
 
 
 def download_file(url,
