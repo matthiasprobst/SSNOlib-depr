@@ -32,6 +32,15 @@ class TestClasses(unittest.TestCase):
     def tearDown(self) -> None:
         _delete_test_data()
 
+    def test_Organization(self):
+        orga = ssnolib.Organization(name='My Orga')
+        self.assertEqual(orga.name, 'My Orga')
+        orga2 = ssnolib.Organization(name='My Orga', mbox='my.orga@orga.org')
+        self.assertEqual(orga2.name, 'My Orga')
+        self.assertEqual(str(orga2.mbox), 'my.orga@orga.org')
+        self.assertNotEqual(orga, orga2)
+        self.assertEqual(orga, orga)
+
     def test_Person(self):
         contact = ssnolib.Person(mbox='johndoe@email.com')
         self.assertEqual(str(contact.mbox), 'johndoe@email.com')

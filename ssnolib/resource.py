@@ -67,6 +67,7 @@ class Distribution(Resource):
     download_URL: Union[HttpUrl, FileUrl]  # dcat:download_URL, e.g.
     media_type: HttpUrl = None  # dcat:media_type
     byte_size: int = None  # dcat:byte_size
+    keyword: List[str] = None  # dcat:keyword
 
     def _repr_html_(self):
         """Returns the HTML representation of the class"""

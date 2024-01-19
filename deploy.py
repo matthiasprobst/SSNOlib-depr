@@ -14,6 +14,7 @@ def generate_namespace_file():
     namespace = 'ssno'
 
     context_file = CACHE_DIR / 'ssno_context.jsonld'
+    context_file.unlink(missing_ok=True)  # force download
     if not context_file.exists():
         context_file = download_file(context_url, context_file)
 

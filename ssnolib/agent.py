@@ -1,4 +1,4 @@
-from pydantic import EmailStr, HttpUrl
+from pydantic import EmailStr
 
 from .core import SSNOlibModel
 
@@ -33,9 +33,12 @@ class Organization(Agent):
 
     Parameters
     ----------
+    name: str
+        Name of the organization (foaf:name)
     mbox: EmailStr = None
         Email address (foaf:mbox)
     """
+    name: str  # foaf:name
 
 
 class Person(Agent):
