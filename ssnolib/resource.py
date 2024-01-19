@@ -75,11 +75,22 @@ class Distribution(Resource):
     def download(self, dest_filename: Union[str, pathlib.Path] = None,
                  overwrite_existing: bool = False) -> pathlib.Path:
         """Downloads the distribution"""
+
+        def _parse_file_url(furl):
+            """in windows, we might need to strip the leading slash"""
+            fname = pathlib.Path(furl)
+            if fname.exists():
+                return fname
+            fname = pathlib.Path(self.download_URL.path[1:])
+            if fname.exists():
+                return fname
+            raise FileNotFoundError(f'File {self.download_URL.path} does not exist')
+
         if self.download_URL.scheme == 'file':
             if dest_filename is None:
-                return pathlib.Path(self.download_URL.path[1:])
+                return _parse_file_url(self.download_URL.path)
             else:
-                return shutil.copy(pathlib.Path(self.download_URL.path[1:]), dest_filename)
+                return shutil.copy(_parse_file_url(self.download_URL.path), dest_filename)
         return download_file(self.download_URL,
                              dest_filename,
                              overwrite_existing=overwrite_existing)
