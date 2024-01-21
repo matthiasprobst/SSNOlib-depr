@@ -3,7 +3,7 @@
   "@type": "SoftwareSourceCode",
   "license": "https://spdx.org/licenses/MIT",
   "codeRepository": "git+https://github.com/matthiasprobst/SSNOlib",
-  "name": "h5RDMtoolbox",
+  "name": "ssnolib",
   "version": "0.1.0",
   "description": "SSNOlib is a Python library for working with the SSNO ontology. ",
   "applicationCategory": "Engineering",
