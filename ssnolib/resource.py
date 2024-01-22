@@ -7,17 +7,16 @@ import pathlib
 import re
 import shutil
 from datetime import datetime
-from typing import Union, List
-
 from dateutil import parser
 from pydantic import HttpUrl, FileUrl, field_validator
+from typing import Union, List
 
 from .agent import Person, Organization
-from .core import SSNOlibModel
+from .core import Thing
 from .utils import download_file
 
 
-class Resource(SSNOlibModel):
+class Resource(Thing):
     """Pyantic implementation of dcat:Resource
 
     .. note::
@@ -73,7 +72,8 @@ class Distribution(Resource):
         """Returns the HTML representation of the class"""
         return f"{self.__class__.__name__}({self.download_URL})"
 
-    def download(self, dest_filename: Union[str, pathlib.Path] = None,
+    def download(self,
+                 dest_filename: Union[str, pathlib.Path] = None,
                  overwrite_existing: bool = False) -> pathlib.Path:
         """Downloads the distribution"""
 
@@ -141,7 +141,7 @@ class Dataset(Resource):
     identifier: HttpUrl = None  # dcterms:identifier, see https://www.w3.org/TR/vocab-dcat-3/#ex-identifier
     # http://www.w3.org/ns/prov#Person, see https://www.w3.org/TR/vocab-dcat-3/#ex-adms-identifier
     contact: Union[Person, Organization] = None
-    distribution: List[Distribution] = None  # dcat:Distribution
+    distribution: Union[Distribution, List[Distribution]] = None  # dcat:Distribution
     modified: datetime = None  # dcterms:modified
 
     @field_validator('modified', mode='before')

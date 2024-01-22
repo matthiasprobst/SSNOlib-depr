@@ -1,13 +1,8 @@
-import json
 import pathlib
 from datetime import datetime
 from typing import List, Union, Dict
 
-import rdflib
-
 from . import plugins
-from .context import SSNO as SSNO_CONTEXT_URL
-from .namespace import SSNO
 from .resource import Dataset, Distribution
 from .standard_name import StandardName
 
@@ -69,40 +64,40 @@ class StandardNameTable(Dataset):
 
         return cls(**data)
 
-    def dump_jsonld(self, context=SSNO_CONTEXT_URL) -> str:
-        """Returns the JSON-LD representation of the class"""
-        _id = '_:' or id
-        jsonld = {"@context": {"@import": SSNO_CONTEXT_URL},
-                  "@graph": [
-                      {"@id": _id,
-                       "@type": str(SSNO.StandardNameTable),
-                       "title": self.title}
-                  ]}
-        if self.description:
-            jsonld['@graph'][0]['description'] = self.description
-        if self.contact:
-            contact = {'@id': '_:contact',
-                       '@type': 'Person',
-                       **self.contact.model_dump(exclude_none=True)}
-            # if 'first_name'
-            jsonld['@graph'][0]['contact'] = contact
-        if self.modified:
-            jsonld['@graph'][0]['modified'] = str(self.modified)
-        if self.version:
-            jsonld['@graph'][0]['version'] = self.version
-        if self.identifier:
-            jsonld['@graph'][0]['identifier'] = str(self.identifier)
-        if self.standard_names:
-            sn_type = str(SSNO.StandardName)
-            jsonld['@graph'][0]['standard names'] = []
-            for sn in self.standard_names[0:2]:
-                jsonld['@graph'][0]['standard names'].append({'@id': f'_:{sn.standard_name}',
-                                                              '@type': sn_type,
-                                                              **sn.model_dump(exclude_none=True)})
-        g = rdflib.Graph()
-        g.parse(data=json.dumps(jsonld), format='json-ld')
-        if context:
-            return g.serialize(format='json-ld',
-                               context={"@import": SSNO_CONTEXT_URL},
-                               indent=4)
-        return g.serialize(format='json-ld', indent=4)
+    # def dump_jsonld(self, context=SSNO_CONTEXT_URL) -> str:
+    #     """Returns the JSON-LD representation of the class"""
+    #     _id = '_:' or id
+    #     jsonld = {"@context": {"@import": SSNO_CONTEXT_URL},
+    #               "@graph": [
+    #                   {"@id": _id,
+    #                    "@type": str(SSNO.StandardNameTable),
+    #                    "title": self.title}
+    #               ]}
+    #     if self.description:
+    #         jsonld['@graph'][0]['description'] = self.description
+    #     if self.contact:
+    #         contact = {'@id': '_:contact',
+    #                    '@type': 'Person',
+    #                    **self.contact.model_dump(exclude_none=True)}
+    #         # if 'first_name'
+    #         jsonld['@graph'][0]['contact'] = contact
+    #     if self.modified:
+    #         jsonld['@graph'][0]['modified'] = str(self.modified)
+    #     if self.version:
+    #         jsonld['@graph'][0]['version'] = self.version
+    #     if self.identifier:
+    #         jsonld['@graph'][0]['identifier'] = str(self.identifier)
+    #     if self.standard_names:
+    #         sn_type = str(SSNO.StandardName)
+    #         jsonld['@graph'][0]['standard names'] = []
+    #         for sn in self.standard_names[0:2]:
+    #             jsonld['@graph'][0]['standard names'].append({'@id': f'_:{sn.standard_name}',
+    #                                                           '@type': sn_type,
+    #                                                           **sn.model_dump(exclude_none=True)})
+    #     g = rdflib.Graph()
+    #     g.parse(data=json.dumps(jsonld), format='json-ld')
+    #     if context:
+    #         return g.serialize(format='json-ld',
+    #                            context={"@import": SSNO_CONTEXT_URL},
+    #                            indent=4)
+    #     return g.serialize(format='json-ld', indent=4)

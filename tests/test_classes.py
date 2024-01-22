@@ -1,13 +1,12 @@
 import json
 import pathlib
+import pydantic
+import rdflib
 import unittest
 import warnings
 
-import pydantic
-import rdflib
-
 import ssnolib
-from ssnolib.context import SSNO as SSNO_CONTEXT_URL
+from ssnolib import CONTEXT
 
 __this_dir__ = pathlib.Path(__file__).parent
 CACHE_DIR = ssnolib.utils.get_cache_dir()
@@ -71,6 +70,8 @@ class TestClasses(unittest.TestCase):
         self.assertTrue(download_filename.is_file())
         download_filename.unlink(missing_ok=True)
 
+        print(distribution.dump_jsonld())
+
     def test_standard_name_table(self):
         snt = ssnolib.StandardNameTable(title='CF Standard Name Table v79')
         self.assertEqual(snt.title, 'CF Standard Name Table v79')
@@ -120,7 +121,7 @@ class TestClasses(unittest.TestCase):
 
         snt_from_xml.title = f'CF Standard Name Table {snt_from_xml.version}'
         with open(CACHE_DIR / 'cfsnt.json', 'w', encoding='utf-8') as f:
-            f.write(snt_from_xml.dump_jsonld())
+            f.write(snt_from_xml.dump_jsonld(context=''))
 
         g = rdflib.Graph().parse(CACHE_DIR / 'cfsnt.json', format='json-ld')
         for s, p, o in g.triples((None, None, None)):
@@ -169,13 +170,13 @@ class TestClasses(unittest.TestCase):
                          'Air temperature is the bulk temperature of the air, not the surface (skin) temperature.')
 
         # to json-ld:
-        atemp_jsonld = atemp.dump_jsonld()
+        jsonld_string = atemp.dump_jsonld()
 
         with open(CACHE_DIR / 'cf_table.json', 'w') as f:
-            f.write(atemp_jsonld)
+            f.write(jsonld_string)
 
         g = rdflib.Graph()
-        g.parse(data=atemp_jsonld, format='json-ld')
+        g.parse(data=jsonld_string, format='json-ld')
         self.assertEqual(len(g), 4)
         for s, p, o in g:
             self.assertIsInstance(s, rdflib.URIRef)
@@ -183,12 +184,14 @@ class TestClasses(unittest.TestCase):
             self.assertIsInstance(o, str)
 
         # serialize with rdflib:
-        jsonld_dict = json.loads(atemp_jsonld)
-        self.assertEqual(jsonld_dict['@context']['@import'], SSNO_CONTEXT_URL)
+        jsonld_dict = json.loads(jsonld_string)
+        self.assertEqual(jsonld_dict['@context']['@import'], CONTEXT)
 
         self.assertEqual(jsonld_dict['@type'], 'StandardName')
         self.assertEqual(jsonld_dict['standard name'], 'air_temperature')
         self.assertEqual(jsonld_dict['canonical units'], 'https://qudt.org/vocab/unit/K')
+
+        print(jsonld_string)
 
         # https://qudt.org/vocab/unit/K
 

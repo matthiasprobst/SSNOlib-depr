@@ -1,9 +1,9 @@
 from pydantic import EmailStr
 
-from .core import SSNOlibModel
+from .core import Thing
 
 
-class Agent(SSNOlibModel):
+class Agent(Thing):
     """Pydantic Model for https://www.w3.org/ns/prov#Agent
 
     .. note::

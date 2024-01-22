@@ -1,9 +1,57 @@
-# SSNOlib
+# sSNOlib
+
 ![Tests](https://github.com/matthiasprobst/SSNOlib/actions/workflows/tests.yml/badge.svg)
 ![DOCS](https://codecov.io/gh/matthiasprobst/SSNOlib/branch/main/graph/badge.svg)
 ![pyvers](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue)
 
-A Python library to work with the [sSNO ontology](https://matthiasprobst.github.io/ssno/).
+A Python library to work with the [sSNO ontology](https://matthiasprobst.github.io/ssno/). It provides Python classes
+for the ontology classes and facilitates the creation of JSON-LD files. JSON-LD files are both human- and machine
+readable and most importantly machine-actionable. The library can be integrated in you data (conversion) pipelines.
+
+## Quickstart
+
+With `ssnolib` you can create Standard Names and their tables quickly and easily. You can find Jupyter Lab Notebooks
+explaining working with [Standard names here](docs/Standard%20Name.ipynb)
+or [Standard Name Tables here](docs/StandardNameTable.ipynb).
+
+The code below gives a quick insight using the *sSNOlib* classes:
+
+```python
+import ssnolib
+
+distribution = ssnolib.Distribution(
+    title='XML Table',
+    download_URL='http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml',
+    media_type='application/xml'
+)
+snt = ssnolib.StandardNameTable(title='CF Standard Name Table (latest version)',
+                                distribution=distribution)
+```
+
+```json
+{
+  "@context": {
+    "@import": "https://raw.githubusercontent.com/matthiasprobst/ssno/main/ssno_context.jsonld"
+  },
+  "@graph": [
+    {
+      "@id": "_:",
+      "@type": "StandardNameTable",
+      "distribution": {
+        "@id": "_:Nf41843a8531647a19824d884268e8c59"
+      },
+      "title": "CF Standard Name Table (latest version)"
+    },
+    {
+      "@id": "_:Nf41843a8531647a19824d884268e8c59",
+      "@type": "Distribution",
+      "download URL": "http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml",
+      "media type": "https://www.iana.org/assignments/media-types/application/xml",
+      "title": "XML Table"
+    }
+  ]
+}
+```
 
 ## Installation
 
@@ -18,8 +66,8 @@ the `xml` extra:
 pip install git+https://github.com/matthiasprobst/SSNOlib.git[xml]
 ``` 
 
-
 To be able to read standard name table from YAML files, you need to add the `yaml` extra:
+
 ```bash
 pip install git+https://github.com/matthiasprobst/SSNOlib.git[yaml]
 ``` 
