@@ -67,7 +67,10 @@ class Thing(SSNOlibModel):
 
         _qudt_unit_dict = {"K": "https://qudt.org/vocab/unit/K"}
 
-        _id = '_:' or id
+        if id is None:
+            _id = '_:'
+        else:
+            _id = id
         jsonld = {"@context": {"@import": context},
                   "@graph": [
                       {"@id": _id,
