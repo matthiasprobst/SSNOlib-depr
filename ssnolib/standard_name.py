@@ -66,11 +66,11 @@ qudt_canonical_unit_lookup = {
     'pascal': QUDT_UNIT.PA,
     'Pascal': QUDT_UNIT.PA,
     # mass
-    'kg': QUDT_UNIT.KG,
-    'kilogram': QUDT_UNIT.KG,
-    'kilograms': QUDT_UNIT.KG,
-    'Kilogram': QUDT_UNIT.KG,
-    'Kilograms': QUDT_UNIT.KG,
+    'kg': QUDT_UNIT.KiloGM,
+    'kilogram': QUDT_UNIT.KiloGM,
+    'kilograms': QUDT_UNIT.KiloGM,
+    'Kilogram': QUDT_UNIT.KiloGM,
+    'Kilograms': QUDT_UNIT.KiloGM,
     # temperature
     'K': QUDT_UNIT.K,
     'kelvin': QUDT_UNIT.K,
