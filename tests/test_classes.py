@@ -44,24 +44,24 @@ class TestClasses(unittest.TestCase):
         contact = ssnolib.Person(mbox='johndoe@email.com')
         self.assertEqual(str(contact.mbox), 'johndoe@email.com')
 
-        contact = ssnolib.Person(first_name='John', last_name='Doe')
-        self.assertEqual(contact.first_name, 'John')
-        self.assertEqual(contact.last_name, 'Doe')
+        contact = ssnolib.Person(firstName='John', lastName='Doe')
+        self.assertEqual(contact.firstName, 'John')
+        self.assertEqual(contact.lastName, 'Doe')
 
     def test_ssnolib_Distribution(self):
         distribution = ssnolib.Distribution(title='XML Table',
-                                            download_URL='http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml',
-                                            media_type='text/csv')
-        self.assertEqual(str(distribution.media_type),
+                                            downloadURL='http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml',
+                                            mediaType='text/csv')
+        self.assertEqual(str(distribution.mediaType),
                          "https://www.iana.org/assignments/media-types/text/csv")
 
         distribution = ssnolib.Distribution(title='XML Table',
-                                            download_URL='http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml',
-                                            media_type='application/xml')
-        self.assertEqual(str(distribution.media_type),
+                                            downloadURL='http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml',
+                                            mediaType='application/xml')
+        self.assertEqual(str(distribution.mediaType),
                          "https://www.iana.org/assignments/media-types/application/xml")
         self.assertEqual(distribution.title, 'XML Table')
-        self.assertEqual(str(distribution.download_URL),
+        self.assertEqual(str(distribution.downloadURL),
                          'http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml')
 
         download_filename = distribution.download('cf-standard-name-table.xml')
@@ -79,15 +79,15 @@ class TestClasses(unittest.TestCase):
         self.assertEqual(repr(snt), 'StandardNameTable(title=CF Standard Name Table v79)')
 
         distribution = ssnolib.Distribution(title='XML Table',
-                                            download_URL='http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml',
-                                            media_type='application/xml')
+                                            downloadURL='http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml',
+                                            mediaType='application/xml')
         self.assertEqual(distribution.title, 'XML Table')
-        self.assertEqual(str(distribution.download_URL),
+        self.assertEqual(str(distribution.downloadURL),
                          'http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml')
         snt = ssnolib.StandardNameTable(title='CF Standard Name Table v79',
                                         distribution=[distribution, ])
         self.assertEqual(snt.distribution[0].title, 'XML Table')
-        self.assertEqual(str(snt.distribution[0].download_URL),
+        self.assertEqual(str(snt.distribution[0].downloadURL),
                          'http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml')
         table_filename = snt.distribution[0].download(
             dest_filename=CACHE_DIR / 'cf-standard-name-table.xml',
@@ -198,8 +198,8 @@ class TestClasses(unittest.TestCase):
     def test_snt_from_yaml(self):
         snt_yml_filename = __this_dir__ / 'data/test_snt.yaml'
         distribution = ssnolib.Distribution(title='XML Table',
-                                            download_URL=f'file:///{snt_yml_filename}',
-                                            media_type='application/yaml')
+                                            downloadURL=f'file:///{snt_yml_filename}',
+                                            mediaType='application/yaml')
         filename = distribution.download(CACHE_DIR / 'test_snt.yaml')
         self.assertNotEqual(filename, snt_yml_filename)
         self.assertTrue(pathlib.Path(filename).exists())

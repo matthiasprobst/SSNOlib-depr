@@ -51,18 +51,18 @@ class Person(Agent):
 
     Parameters
     ----------
-    first_name: str = None
+    firstName: str = None
         First name (foaf:firstName)
-    last_name: str = None
+    lastName: str = None
         Last name (foaf:lastName)
     mbox: EmailStr = None
         Email address (foaf:mbox)
 
     Extra fields are possible but not explicitly defined here.
     """
-    first_name: str = None  # foaf:firstName
-    last_name: str = None  # foaf:lastName
+    firstName: str = None  # foaf:firstName
+    lastName: str = None  # foaf:lastName
 
     def _repr_html_(self) -> str:
         """Returns the HTML representation of the class"""
-        return f"{self.__class__.__name__}({self.first_name} {self.last_name}, {self.mbox})"
+        return f"{self.__class__.__name__}({self.firstName} {self.lastName}, {self.mbox})"

@@ -3,8 +3,6 @@ import pathlib
 import warnings
 from typing import Dict, Union
 
-import yaml
-
 
 class TableReader(abc.ABC):
 
@@ -78,6 +76,11 @@ class XMLReader(TableReader):
 class YAMLReader(TableReader):
 
     def parse(self):
+        try:
+            import yaml
+        except ImportError as e:
+            raise ImportError('Package "pyyaml" is missing, but required to import from YAML files.') from e
+
         with open(self.filename, 'r') as f:
             data = yaml.safe_load(f)
         standard_names = data['standard_names']

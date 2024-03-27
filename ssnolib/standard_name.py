@@ -91,7 +91,7 @@ def parse_canonical_units(units):
 
 
 class StandardName(Thing):
-    """Implementation of ssno:StandardNmae"""
+    """Implementation of ssno:StandardName"""
     standard_name: str
     canonical_units: Union[str, None]
     description: str  # dcterms:description
@@ -117,7 +117,7 @@ class StandardName(Thing):
     @pydantic.field_validator('canonical_units')
     @classmethod
     def _canonical_units(cls, canonical_units):
-        """Validates the download_URL field"""
+        """Validates the downloadURL field"""
         if canonical_units is None:
             return ""
         return canonical_units

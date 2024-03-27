@@ -63,7 +63,9 @@ class Thing(SSNOlibModel):
             context = CONTEXT
 
         g = rdflib.Graph()
-        _atemp_json_dict = serialize_fields(self, exclude_none=exclude_none, serializer=self.JSONLDSerializer())
+        _atemp_json_dict = serialize_fields(self,
+                                            exclude_none=exclude_none,
+                                            serializer=self.JSONLDSerializer())
 
         _qudt_unit_dict = {"K": "https://qudt.org/vocab/unit/K"}
 

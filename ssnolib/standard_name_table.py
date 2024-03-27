@@ -35,7 +35,7 @@ class StandardNameTable(Dataset):
 
     def _repr_html_(self):
         """Returns the HTML representation of the class"""
-        urls = ', '.join(f'<a href="{d.download_URL}">{d.title}</a>' for d in self.distribution)
+        urls = ', '.join(f'<a href="{d.downloadURL}">{d.title}</a>' for d in self.distribution)
         return f"{self.__class__.__name__}({urls})"
 
     @classmethod
@@ -56,7 +56,7 @@ class StandardNameTable(Dataset):
                     )
         else:
             if format is None:
-                format = source.media_type
+                format = source.mediaType
             filename = source.download()
 
         Reader = plugins.get(format)
@@ -79,7 +79,7 @@ class StandardNameTable(Dataset):
     #         contact = {'@id': '_:contact',
     #                    '@type': 'Person',
     #                    **self.contact.model_dump(exclude_none=True)}
-    #         # if 'first_name'
+    #         # if 'firstName'
     #         jsonld['@graph'][0]['contact'] = contact
     #     if self.modified:
     #         jsonld['@graph'][0]['modified'] = str(self.modified)
