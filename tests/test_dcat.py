@@ -30,7 +30,6 @@ class TestDcat(utils.ClassTest):
         self.assertEqual(str(resource1.identifier), 'http://example.com/resource')
 
     def test_Distribution(self):
-
         distribution_none_downloadURL = dcat.Distribution(
             id='_:b2',
             title='Distribution title',
@@ -77,7 +76,7 @@ class TestDcat(utils.ClassTest):
         )
         filename = piv_dist.download(timeout=60)
         self.assertTrue(filename.exists())
-        self.assertEqual(filename.name, 'piv_dataset.json')
+        self.assertEqual(filename.name, 'piv_dataset.jsonld')
         self.assertIsInstance(filename, pathlib.Path)
 
         local_dist = dcat.Distribution(
@@ -93,7 +92,7 @@ class TestDcat(utils.ClassTest):
                 print(e)
                 i += 1
         self.assertTrue(local_filename.exists())
-        self.assertEqual(local_filename.name, 'piv_dataset.json')
+        self.assertEqual(local_filename.name, 'piv_dataset.jsonld')
         self.assertIsInstance(local_filename, pathlib.Path)
 
         filename.unlink(missing_ok=True)

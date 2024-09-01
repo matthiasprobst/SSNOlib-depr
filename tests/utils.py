@@ -3,9 +3,7 @@ import unittest
 
 
 class ClassTest(unittest.TestCase):
-    test_jsonld_filename = 'https://raw.githubusercontent.com/matthiasprobst/SSNOlib/dev/tests/data/piv_dataset.jsonld'
-    test_jsonld_zipped_filename = 'https://raw.githubusercontent.com/matthiasprobst/SSNOlib/main/tests/data/piv_dataset.zip'
-
+    test_jsonld_filename = 'https://raw.githubusercontent.com/matthiasprobst/SSNOlib/dev/tests/data/piv_dataset.jsonld?token=GHSAT0AAAAAACU7HERWPECRE5KAMTVMIZJEZWUQMUA'
     def setUp(self):
         self.maxDiff = None
 
