@@ -48,10 +48,10 @@ The last line dumps the object to a JSON-LD string:
     "dcat:distribution": [
         {
             "@type": "dcat:Distribution",
+            "@id": "_:Nce83c15ff61640e68ba4468ebf016787",
             "dcterms:title": "XML Table",
             "dcat:downloadURL": "http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml",
-            "dcat:mediaType": "https://www.iana.org/assignments/media-types/application/xml",
-            "@id": "_:Nce83c15ff61640e68ba4468ebf016787"
+            "dcat:mediaType": "https://www.iana.org/assignments/media-types/application/xml"
         }
     ]
 }
@@ -124,10 +124,10 @@ The corresponding JSON-LD file looks like this (showing only 2 standard names fo
     "dcat:distribution": [
         {
             "@type": "dcat:Distribution",
+            "@id": "_:N8588e715cf1e4216ba142eea6f1b297d",
             "dcterms:title": "XML Table",
             "dcat:downloadURL": "http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml",
-            "dcat:mediaType": "https://www.iana.org/assignments/media-types/application/xml",
-            "@id": "_:N8588e715cf1e4216ba142eea6f1b297d"
+            "dcat:mediaType": "https://www.iana.org/assignments/media-types/application/xml"
         }
     ]
 }
@@ -162,7 +162,7 @@ The corresponding JSON-LD file looks like this:
     "@id": "_:Naaf73045ffbe415f9ad28cc3daacd3e6",
     "ssno:canonicalUnits": "http://qudt.org/vocab/unit/K",
     "ssno:standardName": "air_temperature",
-    "ssno:description": "Air temperature is the bulk temperature of the air, not the surface (skin) temperature.",
+    "ssno:description": "Air temperature is the bulk temperature of the air, not the surface (skin) temperature."
 }
 ```
 
