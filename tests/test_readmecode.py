@@ -5,8 +5,9 @@ import unittest
 
 class TestReadme(unittest.TestCase):
 
-    # def tearDown(self):
-    #     pathlib.Path('cf79.jsonld').unlink(missing_ok=True)
+    def tearDown(self):
+        pathlib.Path('cf79.jsonld').unlink(missing_ok=True)
+        pathlib.Path('air_temperature.jsonld').unlink(missing_ok=True)
 
     def test_code1(self):
         import ssnolib
@@ -47,5 +48,5 @@ class TestReadme(unittest.TestCase):
                                         description='Air temperature is the bulk temperature of the air, not the surface (skin) temperature.')
 
         # write to JSON-LD
-        with open('air_temperature.json', 'w') as f:
+        with open('air_temperature.jsonld', 'w') as f:
             f.write(air_temp.model_dump_jsonld())

@@ -143,7 +143,7 @@ air_temp = ssnolib.StandardName(standard_name='air_temperature',
                                 description='Air temperature is the bulk temperature of the air, not the surface (skin) temperature.')
 
 # write to JSON-LD
-with open('air_temperature.json', 'w') as f:
+with open('air_temperature.jsonld', 'w') as f:
     f.write(air_temp.model_dump_jsonld())
 ```
 
