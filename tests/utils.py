@@ -1,9 +1,11 @@
-import rdflib
 import unittest
+
+import rdflib
 
 
 class ClassTest(unittest.TestCase):
-    test_jsonld_filename = 'https://raw.githubusercontent.com/matthiasprobst/SSNOlib/dev/tests/data/piv_dataset.jsonld?token=GHSAT0AAAAAACU7HERWPECRE5KAMTVMIZJEZWUQMUA'
+    test_jsonld_filename = 'https://raw.githubusercontent.com/matthiasprobst/SSNOlib/dev/tests/data/piv_dataset.jsonld'
+
     def setUp(self):
         self.maxDiff = None
 

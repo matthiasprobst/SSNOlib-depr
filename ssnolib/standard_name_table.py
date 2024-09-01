@@ -5,8 +5,8 @@ from ontolutils import namespaces, urirefs, Thing
 from pydantic import field_validator, Field
 
 from . import plugins
-from .external_ontologies.dcat import Dataset, Distribution
-from .external_ontologies.prov import Person, Organization
+from ssnolib.dcat import Dataset, Distribution
+from ssnolib.prov import Person, Organization
 from .standard_name import StandardName
 
 

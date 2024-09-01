@@ -60,7 +60,7 @@ class XMLReader(TableReader):
         institution = xmldata.get('institution', None)
         if "@" in contact and institution is not None:
             # it is an email address
-            from .external_ontologies.prov import Organization
+            from ssnolib.prov import Organization
             creator = Organization(mbox=contact, name=institution)
         else:
             creator = contact

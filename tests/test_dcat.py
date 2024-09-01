@@ -4,7 +4,7 @@ import requests.exceptions
 
 import ssnolib
 import utils
-from ssnolib.external_ontologies import dcat, prov
+from ssnolib import dcat, prov
 
 __this_dir__ = pathlib.Path(__file__).parent
 CACHE_DIR = ssnolib.utils.get_cache_dir()

@@ -1,0 +1,22 @@
+{
+    "@context": {
+        "owl": "http://www.w3.org/2002/07/owl#",
+        "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+        "dcat": "http://www.w3.org/ns/dcat#",
+        "dcterms": "http://purl.org/dc/terms/",
+        "prov": "http://www.w3.org/ns/prov#",
+        "ssno": "https://matthiasprobst.github.io/ssno#"
+    },
+    "@type": "ssno:StandardNameTable",
+    "dcterms:title": "CF Standard Name Table v79",
+    "dcat:distribution": [
+        {
+            "@type": "dcat:Distribution",
+            "dcterms:title": "XML Table",
+            "dcat:downloadURL": "http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml",
+            "dcat:mediaType": "https://www.iana.org/assignments/media-types/application/xml",
+            "@id": "_:N8588e715cf1e4216ba142eea6f1b297d"
+        }
+    ],
+    "@id": "_:N82e22ada2da9427fba343d0f978e98e9"
+}

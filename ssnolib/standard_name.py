@@ -4,9 +4,9 @@ from typing import Union
 from ontolutils import namespaces, urirefs
 from pydantic import HttpUrl, field_validator, Field
 
-from .external_ontologies.dcat import Dataset
-from .external_ontologies.qudt import parse_unit
-from .external_ontologies.skos import Concept
+from ssnolib.dcat import Dataset
+from ssnolib.qudt import parse_unit
+from ssnolib.skos import Concept
 
 
 @namespaces(ssno="https://matthiasprobst.github.io/ssno#",

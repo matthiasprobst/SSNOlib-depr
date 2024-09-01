@@ -16,7 +16,7 @@ from pydantic import HttpUrl, FileUrl, field_validator, Field
 from ontolutils import Thing
 from ontolutils import urirefs, namespaces
 from ..prov import Person, Organization, Agent
-from ...utils import download_file
+from ssnolib.utils import download_file
 
 
 @namespaces(dcat="http://www.w3.org/ns/dcat#",

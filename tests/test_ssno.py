@@ -10,8 +10,8 @@ from ontolutils import QUDT_UNIT
 
 import ssnolib
 from ssnolib import StandardName, StandardNameTable
-from ssnolib.external_ontologies.dcat import Distribution
-from ssnolib.external_ontologies.qudt import parse_unit
+from ssnolib.dcat import Distribution
+from ssnolib.qudt import parse_unit
 
 # ignore User Warnings:
 

@@ -2,7 +2,7 @@ import pathlib
 
 import ssnolib
 import unittest
-from ssnolib.external_ontologies import prov
+from ssnolib import prov
 
 __this_dir__ = pathlib.Path(__file__).parent
 CACHE_DIR = ssnolib.utils.get_cache_dir()

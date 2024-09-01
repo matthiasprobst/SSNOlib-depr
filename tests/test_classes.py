@@ -7,7 +7,7 @@ import pydantic
 import rdflib
 
 import ssnolib
-from ssnolib.external_ontologies import dcat
+from ssnolib import dcat
 
 __this_dir__ = pathlib.Path(__file__).parent
 CACHE_DIR = ssnolib.utils.get_cache_dir()
@@ -50,13 +50,13 @@ class TestClasses(unittest.TestCase):
         self.assertEqual(contact.lastName, 'Doe')
 
     def test_ssnolib_Distribution(self):
-        distribution = ssnolib.external_ontologies.dcat.Distribution(title='XML Table',
+        distribution = ssnolib.dcat.Distribution(title='XML Table',
                                                                      download_URL='http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml',
                                                                      media_type='text/csv')
         self.assertEqual(str(distribution.media_type),
                          "https://www.iana.org/assignments/media-types/text/csv")
 
-        distribution = ssnolib.external_ontologies.dcat.Distribution(title='XML Table',
+        distribution = ssnolib.dcat.Distribution(title='XML Table',
                                                                      download_URL='http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml',
                                                                      media_type='application/xml')
         self.assertEqual(str(distribution.media_type),
@@ -79,7 +79,7 @@ class TestClasses(unittest.TestCase):
         self.assertEqual(str(snt), 'CF Standard Name Table v79')
         self.assertEqual(repr(snt), 'StandardNameTable(title=CF Standard Name Table v79)')
 
-        distribution = ssnolib.external_ontologies.dcat.Distribution(title='XML Table',
+        distribution = ssnolib.dcat.Distribution(title='XML Table',
                                                                      download_URL='http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml',
                                                                      media_type='application/xml')
         self.assertEqual(distribution.title, 'XML Table')
