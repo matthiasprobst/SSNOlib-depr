@@ -34,7 +34,7 @@ def generate_namespace_file():
                 else:
                     iris[name]['keys'].append(k)
 
-    with open(__this_dir__ / 'ssnolib/namespace' / 'ssno.py',
+    with open(__this_dir__ / 'ssnolib' / 'namespace.py',
               'w',
               encoding='UTF8') as f:
         f.write('from rdflib.namespace import DefinedNamespace, Namespace\n')

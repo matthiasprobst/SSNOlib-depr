@@ -1,5 +1,6 @@
 import pathlib
-
+import uuid
+from typing import Optional, Union
 import appdirs
 import requests
 
@@ -13,9 +14,9 @@ def get_cache_dir() -> pathlib.Path:
 
 
 def download_file(url,
-                  dest_filename,
-                  known_hash=None,
-                  overwrite_existing: bool = False) -> pathlib.Path:
+                  dest_filename:Optional[Union[str, pathlib.Path]]=None,
+                  known_hash:Optional[str]=None,
+                  exist_ok: bool = False) -> pathlib.Path:
     """Download a file from a URL and check its hash
     
     Parameter
@@ -26,15 +27,18 @@ def download_file(url,
         The destination filename
     known_hash: str
         The expected hash of the file
-    overwrite_existing: bool
-        Whether to overwrite an existing file
+    exist_ok: bool
+        Whether to return an existing file. Otherwise, it is overwritten.
     
     Returns
     -------
     pathlib.Path
         The path to the downloaded file
     """
+    if dest_filename is None:
+        dest_filename = get_cache_dir() / uuid.uuid4().hex
     response = requests.get(url, stream=True)
+    response.raise_for_status()
     if response.status_code == 200:
         content = response.content
 
@@ -50,10 +54,12 @@ def download_file(url,
         dest_parent = dest_filename.parent
         if not dest_parent.exists():
             dest_parent.mkdir(parents=True)
-        if dest_filename.exists() and overwrite_existing:
-            dest_filename.unlink()
-        elif dest_filename.exists() and not overwrite_existing:
-            raise FileExistsError(f'File {dest_filename} already exists and overwrite_existing is set to False.')
+
+        if dest_filename.exists() and exist_ok:
+            return dest_filename
+
+        dest_filename.unlink(missing_ok=True)
+
         with open(dest_filename, "wb") as f:
             f.write(content)
 

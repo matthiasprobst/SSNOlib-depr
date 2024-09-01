@@ -1,165 +1,57 @@
-import pydantic
 import warnings
-from datetime import datetime
 from typing import Union
 
-from .core import Thing
-from .namespace import QUDT_UNIT
-from .resource import Dataset
+from ontolutils import namespaces, urirefs
+from pydantic import HttpUrl, field_validator, Field
 
-qudt_canonical_unit_lookup = {
-    's': QUDT_UNIT.SEC,  # time
-    'm': QUDT_UNIT.M,  # length
-    # derived units
-    # velocity
-    'm/s': QUDT_UNIT.M_PER_SEC,
-    'm s-1': QUDT_UNIT.M_PER_SEC,
-    'm*s-1': QUDT_UNIT.M_PER_SEC,
-    'm*s^-1': QUDT_UNIT.M_PER_SEC,
-    'm*s**-1': QUDT_UNIT.M_PER_SEC,
-    # per length
-    '1/m': QUDT_UNIT.PER_M,
-    'm-1': QUDT_UNIT.PER_M,
-    'm^-1': QUDT_UNIT.PER_M,
-    'm**-1': QUDT_UNIT.PER_M,
-    # per length squared
-    '1/m2': QUDT_UNIT.PER_M2,
-    '1/m**2': QUDT_UNIT.PER_M2,
-    '1/m^2': QUDT_UNIT.PER_M2,
-    'm-2': QUDT_UNIT.PER_M2,
-    'm^-2': QUDT_UNIT.PER_M2,
-    'm**-2': QUDT_UNIT.PER_M2,
-    # per length cubed
-    '1/m3': QUDT_UNIT.PER_M3,
-    '1/m**3': QUDT_UNIT.PER_M3,
-    '1/m^3': QUDT_UNIT.PER_M3,
-    'm-3': QUDT_UNIT.PER_M3,
-    'm^-3': QUDT_UNIT.PER_M3,
-    'm**-3': QUDT_UNIT.PER_M3,
-    # per second
-    '1/s': QUDT_UNIT.PER_SEC,
-    '1 s-1': QUDT_UNIT.PER_SEC,
-    '1*s-1': QUDT_UNIT.PER_SEC,
-    '1*s^-1': QUDT_UNIT.PER_SEC,
-    '1*s**-1': QUDT_UNIT.PER_SEC,
-    's-1': QUDT_UNIT.PER_SEC,
-    's^-1': QUDT_UNIT.PER_SEC,
-    's**-1': QUDT_UNIT.PER_SEC,
-    # per second squared
-    '1/s**2': QUDT_UNIT.PER_SEC2,
-    '1/s^2': QUDT_UNIT.PER_SEC2,
-    's^-2': QUDT_UNIT.PER_SEC2,
-    's-2': QUDT_UNIT.PER_SEC2,
-    's**-2': QUDT_UNIT.PER_SEC2,
-    # frequency
-    'Hz': QUDT_UNIT.HZ,
-    # energy
-    'joule': QUDT_UNIT.J,
-    'Joule': QUDT_UNIT.J,
-    'J': QUDT_UNIT.J,
-    # power
-    'W': QUDT_UNIT.W,
-    'watt': QUDT_UNIT.W,
-    'Watt': QUDT_UNIT.W,
-    # pressure
-    'Pa': QUDT_UNIT.PA,
-    'pascal': QUDT_UNIT.PA,
-    'Pascal': QUDT_UNIT.PA,
-    # mass
-    'kg': QUDT_UNIT.KiloGM,
-    'kilogram': QUDT_UNIT.KiloGM,
-    'kilograms': QUDT_UNIT.KiloGM,
-    'Kilogram': QUDT_UNIT.KiloGM,
-    'Kilograms': QUDT_UNIT.KiloGM,
-    # temperature
-    'K': QUDT_UNIT.K,
-    'kelvin': QUDT_UNIT.K,
-    'Kelvin': QUDT_UNIT.K,
-    # volume
-    'm3': QUDT_UNIT.M3,
-    'm^3': QUDT_UNIT.M3,
-    'm**3': QUDT_UNIT.M3,
-    # torque
-    'N m': QUDT_UNIT.N_M,
-    'N*m': QUDT_UNIT.N_M
-}
+from .external_ontologies.dcat import Dataset
+from .external_ontologies.qudt import parse_unit
+from .external_ontologies.skos import Concept
 
 
-def parse_canonical_units(units):
-    """Returns the IRI for a canonical units"""
-    return str(qudt_canonical_unit_lookup.get(units, units))
-
-
-class StandardName(Thing):
+@namespaces(ssno="https://matthiasprobst.github.io/ssno#",
+            dcat="http://www.w3.org/ns/dcat#")
+@urirefs(StandardName='ssno:StandardName',
+         canonical_units='ssno:canonicalUnits',
+         standard_name='ssno:standardName',
+         description='ssno:description',
+         standard_name_table='ssno:standardNameTable')
+class StandardName(Concept):
     """Implementation of ssno:StandardName"""
-    standard_name: str
-    canonical_units: Union[str, None]
-    description: str  # dcterms:description
-    standard_name_table: Dataset = None  # ssno:standard_name_table (subclass of dcat:Dataset)
+    canonical_units: str = Field(default=None, alias="canonicalUnits")
+    standard_name: str = Field(default=None, alias="standardName")
+    description: str = None  # ssno:description
+    standard_name_table: Dataset = Field(default=None, alias="standardNameTable")
 
-    class JSONLDSerializer:
-        def __call__(self, key, value):
-            if key == 'canonical units':
-                return parse_canonical_units(value)
-            if isinstance(value, datetime):
-                return value.isoformat()
-            return value
+    def __str__(self) -> str:
+        if self.standard_name is None:
+            return ''
+        return self.standard_name
 
-    @pydantic.field_validator('description')
+    @field_validator("standard_name_table", mode='before')
     @classmethod
-    def _description(cls, description):
-        if description is None:
-            warnings.warn("The description should not be None. Please make sure to provide a description. For "
-                          "now, an empty string is used.")
-            return ""
-        return description
+    def _parse_standard_name_table(cls, standard_name_table: Union[Dataset, str]) -> Dataset:
+        """Parse the standard_name_table and return the standard_name_table as Dataset."""
+        if isinstance(standard_name_table, Dataset):
+            return standard_name_table
+        elif isinstance(standard_name_table, str):
+            assert standard_name_table.startswith('http'), f"Expected a URL, got {standard_name_table}"
+            from .standard_name_table import StandardNameTable
+            return StandardNameTable(identifier=standard_name_table)
+        raise TypeError(f"Expected a Dataset, got {type(standard_name_table)}")
 
-    @pydantic.field_validator('canonical_units')
+    @field_validator("canonical_units", mode='before')
     @classmethod
-    def _canonical_units(cls, canonical_units):
-        """Validates the downloadURL field"""
+    def _parse_unit(cls, canonical_units: Union[HttpUrl, str]) -> str:
+        """Parse the canonical_units and return the canonical_units as string."""
         if canonical_units is None:
-            return ""
-        return canonical_units
-
-    def __str__(self):
-        """Returns the standard name"""
-        return self.standard_name
-
-    def dump_dict(self, *args, **kwargs):
-        """alias for model_dump()"""
-        return self.model_dump(*args, **kwargs)
-
-    def dump_json(self, *args, **kwargs):
-        """alias for model_dump_json()"""
-        return self.model_dump_json(*args, **kwargs)
-
-    # def dump_jsonld(self, id=None, context=SSNO_CONTEXT_URL) -> str:
-    #     """alias for model_dump_json()"""
-    #
-    #     g = rdflib.Graph()
-    #     _atemp_json_dict = {k.replace('_', ' '): v for k, v in self.model_dump().items()}
-    #
-    #     _qudt_unit_dict = {"K": "https://qudt.org/vocab/unit/K"}
-    #
-    #     _atemp_json_dict['canonical units'] = _qudt_unit_dict.get(_atemp_json_dict['canonical units'],
-    #                                                               _atemp_json_dict['canonical units'])
-    #
-    #     _id = '_:' or id
-    #     jsonld = {"@context": {"@import": context},
-    #               "@graph": [
-    #                   {"@id": _id,
-    #                    "@type": "ssno:StandardName",
-    #                    **_atemp_json_dict}
-    #               ]}
-    #
-    #     g.parse(data=json.dumps(jsonld), format='json-ld')
-    #     if context:
-    #         return g.serialize(format='json-ld',
-    #                            context={"@import": context},
-    #                            indent=4)
-    #     return g.serialize(format='json-ld', indent=4)
-
-    def _repr_html_(self):
-        """Returns the HTML representation of the class"""
-        return self.standard_name
+            return parse_unit('dimensionless')
+        if isinstance(canonical_units, str):
+            if canonical_units.startswith('http'):
+                return str(HttpUrl(canonical_units))
+            try:
+                return str(parse_unit(canonical_units))
+            except KeyError:
+                warnings.warn(f'Could not parse canonical_units: "{canonical_units}".', UserWarning)
+            return str(canonical_units)
+        return str(HttpUrl(canonical_units))

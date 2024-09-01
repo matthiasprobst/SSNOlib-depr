@@ -1,12 +1,13 @@
 import json
 import pathlib
-import pydantic
-import rdflib
 import unittest
 import warnings
 
+import pydantic
+import rdflib
+
 import ssnolib
-from ssnolib import CONTEXT
+from ssnolib.external_ontologies import dcat
 
 __this_dir__ = pathlib.Path(__file__).parent
 CACHE_DIR = ssnolib.utils.get_cache_dir()
@@ -49,19 +50,19 @@ class TestClasses(unittest.TestCase):
         self.assertEqual(contact.lastName, 'Doe')
 
     def test_ssnolib_Distribution(self):
-        distribution = ssnolib.Distribution(title='XML Table',
-                                            downloadURL='http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml',
-                                            mediaType='text/csv')
-        self.assertEqual(str(distribution.mediaType),
+        distribution = ssnolib.external_ontologies.dcat.Distribution(title='XML Table',
+                                                                     download_URL='http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml',
+                                                                     media_type='text/csv')
+        self.assertEqual(str(distribution.media_type),
                          "https://www.iana.org/assignments/media-types/text/csv")
 
-        distribution = ssnolib.Distribution(title='XML Table',
-                                            downloadURL='http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml',
-                                            mediaType='application/xml')
-        self.assertEqual(str(distribution.mediaType),
+        distribution = ssnolib.external_ontologies.dcat.Distribution(title='XML Table',
+                                                                     download_URL='http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml',
+                                                                     media_type='application/xml')
+        self.assertEqual(str(distribution.media_type),
                          "https://www.iana.org/assignments/media-types/application/xml")
         self.assertEqual(distribution.title, 'XML Table')
-        self.assertEqual(str(distribution.downloadURL),
+        self.assertEqual(str(distribution.download_URL),
                          'http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml')
 
         download_filename = distribution.download('cf-standard-name-table.xml')
@@ -70,7 +71,7 @@ class TestClasses(unittest.TestCase):
         self.assertTrue(download_filename.is_file())
         download_filename.unlink(missing_ok=True)
 
-        print(distribution.dump_jsonld())
+        print(distribution.model_dump_jsonld())
 
     def test_standard_name_table(self):
         snt = ssnolib.StandardNameTable(title='CF Standard Name Table v79')
@@ -78,16 +79,16 @@ class TestClasses(unittest.TestCase):
         self.assertEqual(str(snt), 'CF Standard Name Table v79')
         self.assertEqual(repr(snt), 'StandardNameTable(title=CF Standard Name Table v79)')
 
-        distribution = ssnolib.Distribution(title='XML Table',
-                                            downloadURL='http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml',
-                                            mediaType='application/xml')
+        distribution = ssnolib.external_ontologies.dcat.Distribution(title='XML Table',
+                                                                     download_URL='http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml',
+                                                                     media_type='application/xml')
         self.assertEqual(distribution.title, 'XML Table')
-        self.assertEqual(str(distribution.downloadURL),
+        self.assertEqual(str(distribution.download_URL),
                          'http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml')
         snt = ssnolib.StandardNameTable(title='CF Standard Name Table v79',
                                         distribution=[distribution, ])
         self.assertEqual(snt.distribution[0].title, 'XML Table')
-        self.assertEqual(str(snt.distribution[0].downloadURL),
+        self.assertEqual(str(snt.distribution[0].download_URL),
                          'http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml')
         table_filename = snt.distribution[0].download(
             dest_filename=CACHE_DIR / 'cf-standard-name-table.xml',
@@ -106,14 +107,15 @@ class TestClasses(unittest.TestCase):
             dest_filename=CACHE_DIR / 'cf-standard-name-table.xml',
             overwrite_existing=True
         )
-        snt_from_xml = snt.parse(table_filename, format='xml')
+        snt_from_xml = snt.parse(table_filename, fmt='xml')
         self.assertIsInstance(snt_from_xml.standard_names, list)
         for sn in snt_from_xml.standard_names:
             self.assertIsInstance(sn, ssnolib.StandardName)
 
         snt_from_xml_dict = snt_from_xml.model_dump(exclude_none=True)
-        self.assertDictEqual(snt_from_xml_dict['contact'],
-                             {'mbox': 'support@ceda.ac.uk'})
+        self.assertDictEqual(snt_from_xml_dict['creator'],
+                             {'mbox': 'support@ceda.ac.uk',
+                              'name': 'Centre for Environmental Data Analysis'})
 
         with self.assertRaises(pydantic.ValidationError):
             # invalid string for title:
@@ -121,7 +123,7 @@ class TestClasses(unittest.TestCase):
 
         snt_from_xml.title = f'CF Standard Name Table {snt_from_xml.version}'
         with open(CACHE_DIR / 'cfsnt.json', 'w', encoding='utf-8') as f:
-            f.write(snt_from_xml.dump_jsonld(context=''))
+            f.write(snt_from_xml.model_dump_jsonld(context=None))
 
         g = rdflib.Graph().parse(CACHE_DIR / 'cfsnt.json', format='json-ld')
         for s, p, o in g.triples((None, None, None)):
@@ -145,7 +147,7 @@ class TestClasses(unittest.TestCase):
 
         self.assertEqual(str(atemp), 'air_temperature')
         self.assertEqual(atemp.standard_name, 'air_temperature')
-        self.assertEqual(atemp.canonical_units, 'K')
+        self.assertEqual(atemp.canonical_units, 'http://qudt.org/vocab/unit/K')
         self.assertEqual(atemp.description,
                          'Air temperature is the bulk temperature of the air, not the surface (skin) temperature.')
 
@@ -156,7 +158,7 @@ class TestClasses(unittest.TestCase):
         atemp_dict = atemp.model_dump(exclude_none=True)
         self.assertIsInstance(atemp_dict, dict)
         self.assertEqual(atemp_dict['standard_name'], 'air_temperature')
-        self.assertEqual(atemp_dict['canonical_units'], 'K')
+        self.assertEqual(atemp_dict['canonical_units'], 'http://qudt.org/vocab/unit/K')
         self.assertEqual(atemp_dict['description'],
                          'Air temperature is the bulk temperature of the air, not the surface (skin) temperature.')
 
@@ -165,12 +167,12 @@ class TestClasses(unittest.TestCase):
         atemp_json_dict = json.loads(atemp_json)
         self.assertIsInstance(atemp_json_dict, dict)
         self.assertEqual(atemp_json_dict['standard_name'], 'air_temperature')
-        self.assertEqual(atemp_json_dict['canonical_units'], 'K')
+        self.assertEqual(atemp_json_dict['canonical_units'], 'http://qudt.org/vocab/unit/K')
         self.assertEqual(atemp_json_dict['description'],
                          'Air temperature is the bulk temperature of the air, not the surface (skin) temperature.')
 
         # to json-ld:
-        jsonld_string = atemp.dump_jsonld()
+        jsonld_string = atemp.model_dump_jsonld()
 
         with open(CACHE_DIR / 'cf_table.json', 'w') as f:
             f.write(jsonld_string)
@@ -178,18 +180,22 @@ class TestClasses(unittest.TestCase):
         g = rdflib.Graph()
         g.parse(data=jsonld_string, format='json-ld')
         self.assertEqual(len(g), 4)
+        print(jsonld_string)
         for s, p, o in g:
-            self.assertIsInstance(s, rdflib.URIRef)
+            print(s, p, o)
+            self.assertIsInstance(s, rdflib.BNode)
             self.assertIsInstance(p, rdflib.URIRef)
             self.assertIsInstance(o, str)
 
         # serialize with rdflib:
         jsonld_dict = json.loads(jsonld_string)
-        self.assertEqual(jsonld_dict['@context']['@import'], CONTEXT)
+        # self.assertEqual(jsonld_dict['@context']['@import'], CONTEXT)
 
-        self.assertEqual(jsonld_dict['@type'], 'StandardName')
-        self.assertEqual(jsonld_dict['standard name'], 'air_temperature')
-        self.assertEqual(jsonld_dict['canonical units'], 'https://qudt.org/vocab/unit/K')
+        self.assertEqual(jsonld_dict['@type'], 'ssno:StandardName')
+        self.assertEqual(jsonld_dict['ssno:standardName'], 'air_temperature')
+        self.assertEqual(jsonld_dict['ssno:description'],
+                         'Air temperature is the bulk temperature of the air, not the surface (skin) temperature.')
+        self.assertEqual(jsonld_dict['ssno:canonicalUnits'], 'http://qudt.org/vocab/unit/K')
 
         print(jsonld_string)
 
@@ -197,15 +203,15 @@ class TestClasses(unittest.TestCase):
 
     def test_snt_from_yaml(self):
         snt_yml_filename = __this_dir__ / 'data/test_snt.yaml'
-        distribution = ssnolib.Distribution(title='XML Table',
-                                            downloadURL=f'file:///{snt_yml_filename}',
-                                            mediaType='application/yaml')
+        distribution = dcat.Distribution(title='XML Table',
+                                         download_URL=f'file:///{snt_yml_filename}',
+                                         media_type='application/yaml')
         filename = distribution.download(CACHE_DIR / 'test_snt.yaml')
         self.assertNotEqual(filename, snt_yml_filename)
         self.assertTrue(pathlib.Path(filename).exists())
         self.assertIsInstance(filename, pathlib.Path)
         snt = ssnolib.StandardNameTable(
             title='Yaml Test SNT',
-            distribution=[distribution]
+            distribution=[distribution, ]
         )
         snt.parse(snt.distribution[0])

@@ -5,6 +5,7 @@ from typing import Dict, Union
 
 
 class TableReader(abc.ABC):
+    """Abstract Standard Name Table Reader"""
 
     def __init__(self, filename: Union[str, pathlib.Path]):
         self.filename = pathlib.Path(filename)
@@ -33,9 +34,18 @@ class XMLReader(TableReader):
         xmldata = xmldict[_name]
 
         def _parse_standard_name(sndict):
-            canonical_units = sndict.get('canonical units')
-            description = sndict.get('description', )
+            canonical_units = sndict.get('canonical_units', '')
+            if canonical_units == '1':
+                canonical_units = ''
+            elif canonical_units is None:
+                canonical_units = ''
+            description = sndict.get('description', '')
+            if description is None:
+                description = ''
             standard_name = sndict.get('@id')
+            assert standard_name is not None, 'Expected key "@id" in the XML file.'
+            assert canonical_units is not None, 'Expected key "canonical_units" in the XML file.'
+            assert description is not None, 'Expected key "description" in the XML file.'
             return dict(standard_name=standard_name,
                         canonical_units=canonical_units,
                         description=description)
@@ -44,12 +54,17 @@ class XMLReader(TableReader):
         if version is None:
             version = xmldata.get('version_number', None)
 
-        last_modified = xmldata.get('last_modified', None)
+        # last_modified = xmldata.get('last_modified', None)
 
         contact = xmldata.get('contact', None)
-        if "@" in contact:
+        institution = xmldata.get('institution', None)
+        if "@" in contact and institution is not None:
             # it is an email address
-            contact = {'mbox': contact}
+            from .external_ontologies.prov import Organization
+            creator = Organization(mbox=contact, name=institution)
+        else:
+            creator = contact
+
             # else cannot be parsed
 
         sn_data = xmldata.get('entry', None)
@@ -57,8 +72,8 @@ class XMLReader(TableReader):
             raise KeyError('Expected key "entry" in the XML file.')
         data = {'standard_name': [_parse_standard_name(sn) for sn in sn_data],
                 'version': version,
-                'modified': last_modified,
-                'contact': contact}
+                # 'modified': last_modified,
+                'creator': creator}
 
         if 'title' not in xmldata:
             data['title'] = self.filename.stem
@@ -98,23 +113,71 @@ class YAMLReader(TableReader):
                     _data.pop(k)
             return _data
 
-        return {'title': data.get('name', data.get('title', None)),
-                'standard_names': [_parse_standard_names(k, v) for k, v in data['standard_names'].items()]}
+        creator = data.get('creator', {})
+        # make the orcid id the ID of the creator:
+        if creator:
+            if isinstance(creator, list):
+                for ic, c in enumerate(creator.copy()):
+                    if c['orcid_id']:
+                        creator[ic]['id'] = c['orcid_id']
+            else:
+                if creator['orcid_id']:
+                    creator['id'] = creator['orcid_id']
+
+        qualifications = {}
+        # locations = data.get('locations', None)
+        # devices = data.get('devices', None)
+        # media = data.get('media', None)
+        # conditions = data.get('conditions', None)
+        # reference_frames = data.get('reference_frames', None)
+        # surfaces = data.get('surfaces', None)
+
+        for q in ('locations', 'devices', 'media', 'conditions', 'reference_frames', 'surfaces'):
+            if q in data:
+                qualifications[q] = [{'name': ak, 'description': av} for ak, av in data[q].items()]
+        # if locations:
+        #     qualifications = {'locations': [{'location': ak, 'description': av} for ak, av in locations.items()]}
+
+        data_dict = {'title': data.get('name', data.get('title', None)),
+                     'creator': data.get('creator', {}),
+                     'version': data.get('version', None),
+                     'description': data.get('description', None),
+                     'identifier': data.get('identifier', None),
+                     'standard_names': [_parse_standard_names(k, v) for k, v in standard_names.items()],
+                     **qualifications}
+        if data.get('identifier', None):
+            data_dict['id'] = data.get('identifier', None)
+
+        return data_dict
+
+
+class JSONLDReader(TableReader):
+    def parse(self) -> Dict:
+        from .standard_name_table import StandardNameTable
+        with open(self.filename, 'r') as f:
+            import json
+            snt = StandardNameTable.from_jsonld(data=json.load(f), limit=1)
+            return snt.model_dump(exclude_none=True)
 
 
 _plugins = {
     'xml': XMLReader,
     'text/xml': XMLReader,
     'https://www.iana.org/assignments/media-types/text/xml': XMLReader,
-    'text/yml': YAMLReader,
+    'https://www.iana.org/assignments/media-types/application/xml': XMLReader,
+    'yaml': YAMLReader,
+    'yml': YAMLReader,
     'application/yaml': YAMLReader,
-    'https://www.iana.org/assignments/media-types/application/yaml': YAMLReader
+    'https://www.iana.org/assignments/media-types/application/yaml': YAMLReader,
+    'jsonld': JSONLDReader,
+    'application/json-ld': JSONLDReader,
+    'https://www.iana.org/assignments/media-types/application/ld+json': JSONLDReader
 }
 
 
-def get(plugin_name: str) -> TableReader:
+def get(plugin_name: str, default=None) -> Union[TableReader, None]:
     """Returns the plugin"""
     plugin = _plugins.get(str(plugin_name), None)
     if plugin is None:
-        raise KeyError(f'No plugin found for {plugin_name}')
+        return default
     return plugin
