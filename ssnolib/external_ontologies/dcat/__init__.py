@@ -1,3 +1,3 @@
-from .resource import Dataset, Distribution
+from .resource import Dataset, Distribution, Resource
 
-__all__ = ['Dataset', 'Distribution']
+__all__ = ['Dataset', 'Distribution', 'Resource']

@@ -1,14 +1,13 @@
 import pathlib
 
-import pivmetalib
 import requests.exceptions
-from pivmetalib import dcat
-from pivmetalib import prov
 
+import ssnolib
 import utils
+from ssnolib.external_ontologies import dcat, prov
 
 __this_dir__ = pathlib.Path(__file__).parent
-CACHE_DIR = pivmetalib.utils.get_cache_dir()
+CACHE_DIR = ssnolib.utils.get_cache_dir()
 
 
 class TestDcat(utils.ClassTest):

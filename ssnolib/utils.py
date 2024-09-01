@@ -1,6 +1,7 @@
 import pathlib
 import uuid
 from typing import Optional, Union
+
 import appdirs
 import requests
 
@@ -14,9 +15,10 @@ def get_cache_dir() -> pathlib.Path:
 
 
 def download_file(url,
-                  dest_filename:Optional[Union[str, pathlib.Path]]=None,
-                  known_hash:Optional[str]=None,
-                  exist_ok: bool = False) -> pathlib.Path:
+                  dest_filename: Optional[Union[str, pathlib.Path]] = None,
+                  known_hash: Optional[str] = None,
+                  exist_ok: bool = False,
+                  **kwargs) -> pathlib.Path:
     """Download a file from a URL and check its hash
     
     Parameter
@@ -29,6 +31,8 @@ def download_file(url,
         The expected hash of the file
     exist_ok: bool
         Whether to return an existing file. Otherwise, it is overwritten.
+    **kwargs
+        Additional keyword arguments passed to requests.get()
     
     Returns
     -------
@@ -37,7 +41,7 @@ def download_file(url,
     """
     if dest_filename is None:
         dest_filename = get_cache_dir() / uuid.uuid4().hex
-    response = requests.get(url, stream=True)
+    response = requests.get(url, stream=True, **kwargs)
     response.raise_for_status()
     if response.status_code == 200:
         content = response.content
